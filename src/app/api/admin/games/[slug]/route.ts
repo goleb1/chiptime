@@ -1,23 +1,23 @@
-import { notFound } from "next/navigation";
+import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase";
 import { mapGameRow, mapRunnerRow } from "@/lib/db-utils";
-import AdminGameView from "@/components/admin/AdminGameView";
 
-export default async function ManageGamePage({
-  params,
-}: {
-  params: Promise<{ secret: string; slug: string }>;
-}) {
-  const { secret, slug } = await params;
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
   const db = createAdminClient();
 
-  const { data: gameRow } = await db
+  const { data: gameRow, error: gameError } = await db
     .from("games")
     .select("*")
     .eq("slug", slug)
     .single();
 
-  if (!gameRow) notFound();
+  if (gameError || !gameRow) {
+    return NextResponse.json({ error: "Game not found" }, { status: 404 });
+  }
 
   const game = mapGameRow(gameRow);
 
@@ -33,14 +33,9 @@ export default async function ManageGamePage({
       .eq("game_id", game.id),
   ]);
 
-  const runners = (runnerRows || []).map(mapRunnerRow);
-
-  return (
-    <AdminGameView
-      initialGame={game}
-      initialRunners={runners}
-      initialGuesserCount={guesserCount ?? 0}
-      secret={secret}
-    />
-  );
+  return NextResponse.json({
+    game,
+    runners: (runnerRows || []).map(mapRunnerRow),
+    guesserCount: guesserCount ?? 0,
+  });
 }

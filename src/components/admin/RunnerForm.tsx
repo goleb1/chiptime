@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { addRunner } from "@/lib/actions/admin";
 import type { ActionResult } from "@/lib/db-utils";
 import type { Runner } from "@/lib/types";
@@ -19,11 +19,21 @@ async function addRunnerAction(
 export default function RunnerForm({
   gameId,
   distances,
+  onMutate,
 }: {
   gameId: string;
   distances: string[];
+  onMutate?: () => void;
 }) {
   const [state, action, pending] = useActionState(addRunnerAction, null);
+  const prevStateRef = useRef(state);
+
+  useEffect(() => {
+    if (state && state !== prevStateRef.current && state.success) {
+      onMutate?.();
+    }
+    prevStateRef.current = state;
+  }, [state, onMutate]);
 
   return (
     <form action={action} className="flex flex-wrap items-end gap-3">

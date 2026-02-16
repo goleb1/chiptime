@@ -79,7 +79,7 @@ export async function submitPredictions(
   if (dnfCount > MAX_DNF_BADGES_PER_GUESSER) {
     return {
       success: false,
-      error: `You can use at most ${MAX_DNF_BADGES_PER_GUESSER} DNF badges.`,
+      error: `You can use at most ${MAX_DNF_BADGES_PER_GUESSER} DNF Calls.`,
     };
   }
 

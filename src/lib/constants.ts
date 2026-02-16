@@ -78,7 +78,7 @@ export const AWARD_DEFINITIONS: AwardDefinition[] = [
     icon: "🔮",
     label: "Oracle",
     description:
-      "Correctly flagged a runner for DNF using a DNF Risk badge.",
+      "Correctly flagged a runner for DNF using a DNF Call.",
   },
 ];
 
@@ -87,6 +87,8 @@ export const AWARD_DEFINITIONS: AwardDefinition[] = [
 // ============================================================
 
 export const LEADERBOARD_POLL_INTERVAL_MS = 30_000;
+
+export const ADMIN_POLL_INTERVAL_MS = 5_000;
 
 // ============================================================
 // DNF Badge Limit

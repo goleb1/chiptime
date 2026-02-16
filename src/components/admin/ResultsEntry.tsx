@@ -10,9 +10,11 @@ import StatusBadge from "@/components/ui/StatusBadge";
 export default function ResultsEntry({
   runners,
   gameId,
+  onMutate,
 }: {
   runners: Runner[];
   gameId: string;
+  onMutate?: () => void;
 }) {
   // Group runners by distance
   const grouped = runners.reduce<Record<string, Runner[]>>((acc, runner) => {
@@ -30,7 +32,7 @@ export default function ResultsEntry({
           </h3>
           <div className="space-y-2">
             {distanceRunners.map((runner) => (
-              <RunnerResultRow key={runner.id} runner={runner} gameId={gameId} />
+              <RunnerResultRow key={runner.id} runner={runner} gameId={gameId} onMutate={onMutate} />
             ))}
           </div>
         </div>
@@ -39,7 +41,15 @@ export default function ResultsEntry({
   );
 }
 
-function RunnerResultRow({ runner, gameId }: { runner: Runner; gameId: string }) {
+function RunnerResultRow({
+  runner,
+  gameId,
+  onMutate,
+}: {
+  runner: Runner;
+  gameId: string;
+  onMutate?: () => void;
+}) {
   const [timeStr, setTimeStr] = useState(
     runner.actualTimeSeconds !== null ? secondsToTimeString(runner.actualTimeSeconds) : ""
   );
@@ -69,6 +79,7 @@ function RunnerResultRow({ runner, gameId }: { runner: Runner; gameId: string })
       setError(result.error);
     } else {
       setSaved(true);
+      onMutate?.();
     }
     setLoading(false);
   }

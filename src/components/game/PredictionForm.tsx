@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import type { Game, Runner } from "@/lib/types";
 import { submitPredictions } from "@/lib/actions/game";
 import { getDefaultTimeForDistance } from "@/lib/utils";
@@ -34,6 +35,7 @@ function fieldsToSeconds(f: TimeFields): number {
 }
 
 export default function PredictionForm({ game, runners }: PredictionFormProps) {
+  const router = useRouter();
   const [guesserName, setGuesserName] = useState("");
   const [times, setTimes] = useState<Record<string, TimeFields>>(() => {
     const init: Record<string, TimeFields> = {};
@@ -106,6 +108,7 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
       setError(result.error);
     } else {
       setSubmitted(true);
+      router.push(`/results/${game.slug}`);
     }
   }
 
@@ -118,7 +121,7 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
             Predictions submitted!
           </p>
           <p className="text-sm text-green-700 dark:text-green-400">
-            Good luck, {guesserName}! Check back after the race to see results.
+            Redirecting to results...
           </p>
         </div>
       </div>
@@ -200,7 +203,7 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
                   className="rounded border-gray-300"
                 />
                 <span className="text-gray-700 dark:text-gray-300">
-                  DNF Risk Badge
+                  DNF Call
                 </span>
               </label>
             </div>
@@ -209,7 +212,7 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
       ))}
 
       <p className="text-sm text-gray-500">
-        DNF badges used: {dnfCount} of {MAX_DNF_BADGES_PER_GUESSER}
+        DNF Calls used: {dnfCount} of {MAX_DNF_BADGES_PER_GUESSER}
       </p>
 
       <Button

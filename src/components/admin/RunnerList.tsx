@@ -11,10 +11,12 @@ export default function RunnerList({
   runners,
   gameId,
   gameStatus,
+  onMutate,
 }: {
   runners: Runner[];
   gameId: string;
   gameStatus: GameStatus;
+  onMutate?: () => void;
 }) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -30,6 +32,7 @@ export default function RunnerList({
     setDeletingId(runnerId);
     await deleteRunner(runnerId, gameId);
     setDeletingId(null);
+    onMutate?.();
   }
 
   if (runners.length === 0) {

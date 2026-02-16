@@ -1,0 +1,118 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import type { Game, Runner } from "@/lib/types";
+import { ADMIN_POLL_INTERVAL_MS } from "@/lib/constants";
+import GameStatusBar from "./GameStatusBar";
+import RunnerForm from "./RunnerForm";
+import RunnerList from "./RunnerList";
+import ResultsEntry from "./ResultsEntry";
+
+interface AdminGameViewProps {
+  initialGame: Game;
+  initialRunners: Runner[];
+  initialGuesserCount: number;
+  secret: string;
+}
+
+export default function AdminGameView({
+  initialGame,
+  initialRunners,
+  initialGuesserCount,
+  secret,
+}: AdminGameViewProps) {
+  const [game, setGame] = useState(initialGame);
+  const [runners, setRunners] = useState(initialRunners);
+  const [guesserCount, setGuesserCount] = useState(initialGuesserCount);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/games/${game.slug}`);
+      if (res.ok) {
+        const json = await res.json();
+        setGame(json.game);
+        setRunners(json.runners);
+        setGuesserCount(json.guesserCount);
+      }
+    } catch {
+      // Silently ignore poll failures
+    }
+  }, [game.slug]);
+
+  useEffect(() => {
+    if (game.status === "finalized") return;
+
+    const interval = setInterval(fetchData, ADMIN_POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [game.status, fetchData]);
+
+  // Immediate refresh after any mutation (add runner, enter result, status change)
+  const onMutate = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const shareUrl = `/game/${game.slug}`;
+  const showGuesserCount =
+    game.status === "predictions_open" ||
+    game.status === "predictions_locked" ||
+    game.status === "results_entering";
+
+  const showResultsEntry =
+    game.status === "results_entering" || game.status === "predictions_locked";
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          {game.name}
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          {game.raceDate} &middot; {game.distances.join(", ")}
+        </p>
+        <p className="text-sm text-gray-400 mt-1">
+          Share link:{" "}
+          <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">
+            {shareUrl}
+          </code>
+        </p>
+        {showGuesserCount && (
+          <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+            {guesserCount} {guesserCount === 1 ? "guesser" : "guessers"} submitted
+          </p>
+        )}
+      </div>
+
+      <GameStatusBar gameId={game.id} status={game.status} onMutate={onMutate} />
+
+      {/* During results entry, show a single combined runners + results view */}
+      {showResultsEntry ? (
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+            Runners & Results
+          </h2>
+          <ResultsEntry runners={runners} gameId={game.id} onMutate={onMutate} />
+        </section>
+      ) : (
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+            Runners
+          </h2>
+
+          {game.status === "setup" && (
+            <RunnerForm gameId={game.id} distances={game.distances} onMutate={onMutate} />
+          )}
+
+          <RunnerList runners={runners} gameId={game.id} gameStatus={game.status} onMutate={onMutate} />
+        </section>
+      )}
+
+      {game.status === "finalized" && (
+        <section>
+          <p className="text-green-600 font-medium">
+            This game has been finalized. Scores and awards have been computed.
+          </p>
+        </section>
+      )}
+    </div>
+  );
+}

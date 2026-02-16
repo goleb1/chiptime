@@ -8,16 +8,17 @@ import Button from "@/components/ui/Button";
 
 const NEXT_STATUS: Partial<Record<GameStatus, { label: string; status: GameStatus }>> = {
   setup: { label: "Open Predictions", status: "predictions_open" },
-  predictions_open: { label: "Lock Predictions", status: "predictions_locked" },
-  predictions_locked: { label: "Start Entering Results", status: "results_entering" },
+  predictions_open: { label: "Lock Predictions & Enter Results", status: "results_entering" },
 };
 
 export default function GameStatusBar({
   gameId,
   status,
+  onMutate,
 }: {
   gameId: string;
   status: GameStatus;
+  onMutate?: () => void;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +32,7 @@ export default function GameStatusBar({
     const result = await updateGameStatus(gameId, next.status);
     if (!result.success) setError(result.error);
     setLoading(false);
+    onMutate?.();
   }
 
   async function handleFinalize() {
@@ -40,6 +42,7 @@ export default function GameStatusBar({
     const result = await finalizeGame(gameId);
     if (!result.success) setError(result.error);
     setLoading(false);
+    onMutate?.();
   }
 
   return (

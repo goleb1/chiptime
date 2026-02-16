@@ -20,7 +20,7 @@ import { computeAwards } from "@/lib/awards";
 
 const VALID_TRANSITIONS: Record<GameStatus, GameStatus[]> = {
   setup: ["predictions_open"],
-  predictions_open: ["predictions_locked"],
+  predictions_open: ["predictions_locked", "results_entering"],
   predictions_locked: ["results_entering"],
   results_entering: ["finalized"],
   finalized: [],

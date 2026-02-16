@@ -43,8 +43,13 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
     }
   }, [slug]);
 
+  // Fetch immediately on mount to replace stale server-rendered data
   useEffect(() => {
-    if (data.status !== "results_entering") return;
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    if (data.status !== "results_entering" && data.status !== "predictions_locked") return;
 
     const interval = setInterval(fetchData, LEADERBOARD_POLL_INTERVAL_MS);
     return () => clearInterval(interval);
@@ -68,8 +73,6 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
   const getPredictionsForGuesser = (guesserId: string) =>
     data.predictions.filter((p) => p.guesserId === guesserId);
 
-  const runnerById = new Map(data.runners.map((r) => [r.id, r]));
-
   // Sort runners by distance order, then sortOrder
   const distanceOrder = new Map(
     SUPPORTED_DISTANCES.map((d, i) => [d.name, i])
@@ -83,6 +86,7 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
   });
 
   const isFinalized = data.status === "finalized";
+  const isLive = data.status === "results_entering" || data.status === "predictions_locked";
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -90,7 +94,7 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
         <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
           Leaderboard
         </h2>
-        {data.status === "results_entering" && (
+        {isLive && (
           <span className="text-xs text-amber-600 dark:text-amber-400 animate-pulse">
             Live — updating every 30s
           </span>
@@ -107,11 +111,12 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
       ) : (
         <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
           {/* Header */}
-          <div className="grid grid-cols-[2.5rem_1fr_4rem_auto] gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <div className="grid grid-cols-[2rem_1fr_auto_3.5rem_2rem] gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             <span>#</span>
             <span>Name</span>
+            <span />
             <span className="text-right">Score</span>
-            <span className="w-16" />
+            <span />
           </div>
 
           {/* Rows */}
@@ -128,21 +133,23 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                 {/* Main row */}
                 <button
                   onClick={() => toggleExpanded(guesser.id)}
-                  className="w-full grid grid-cols-[2.5rem_1fr_4rem_auto] gap-2 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="w-full grid grid-cols-[2rem_1fr_auto_3.5rem_2rem] gap-2 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 >
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     {guesser.rank ?? "—"}
                   </span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate min-w-0">
                     {guesser.name}
-                    {awards.map((a) => (
-                      <AwardBadge key={a.id} awardType={a.awardType} />
+                  </span>
+                  <span className="flex items-center gap-1 shrink-0">
+                    {awards.map((a, i) => (
+                      <AwardBadge key={`${a.guesserId}-${a.awardType}-${i}`} awardType={a.awardType} />
                     ))}
                   </span>
                   <span className="text-sm text-right text-gray-700 dark:text-gray-300 font-mono">
                     {guesser.totalScore ?? "—"}
                   </span>
-                  <span className="w-16 text-right text-xs text-gray-400">
+                  <span className="text-right text-xs text-gray-400">
                     {isExpanded ? "▲" : "▼"}
                   </span>
                 </button>
@@ -175,7 +182,7 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                               {pred.dnfBadge && (
                                 <span
                                   className="ml-1 text-red-500"
-                                  title="DNF badge used"
+                                  title="DNF Call"
                                 >
                                   DNF
                                 </span>
