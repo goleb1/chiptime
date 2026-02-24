@@ -24,7 +24,7 @@ export async function GET(
   const [{ data: runnerRows }, { count: guesserCount }] = await Promise.all([
     db
       .from("runners")
-      .select("*")
+      .select("*, athletes(*)")
       .eq("game_id", game.id)
       .order("sort_order", { ascending: true }),
     db

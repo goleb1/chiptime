@@ -31,6 +31,12 @@ export default async function AdminLayout({
           >
             Create Game
           </Link>
+          <Link
+            href={`/admin/${secret}/athletes`}
+            className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            Athletes
+          </Link>
         </div>
       </nav>
       <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>

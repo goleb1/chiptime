@@ -4,13 +4,14 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase";
 import {
   generateSlug,
+  mapAthleteRow,
   mapGameRow,
   mapRunnerRow,
   mapGuesserRow,
   mapPredictionRow,
 } from "@/lib/db-utils";
 import type { ActionResult } from "@/lib/db-utils";
-import type { Game, GameStatus, Runner, RunnerStatus } from "@/lib/types";
+import type { Athlete, Game, GameStatus, Runner, RunnerStatus } from "@/lib/types";
 import { scorePrediction, scoreDnf, scoreGuesser } from "@/lib/scoring";
 import { computeAwards } from "@/lib/awards";
 
@@ -74,15 +75,34 @@ export async function createGame(formData: FormData): Promise<ActionResult<Game>
 
 export async function addRunner(formData: FormData): Promise<ActionResult<Runner>> {
   const gameId = formData.get("gameId") as string;
-  const name = formData.get("name") as string;
   const distance = formData.get("distance") as string;
   const notes = (formData.get("notes") as string) || null;
+  const athleteId = (formData.get("athleteId") as string) || null;
 
-  if (!gameId || !name || !distance) {
-    return { success: false, error: "Game ID, name, and distance are required." };
+  if (!gameId || !distance) {
+    return { success: false, error: "Game ID and distance are required." };
   }
 
   const db = createAdminClient();
+
+  // Resolve runner name from athlete or fall back to manual name field
+  let name: string;
+  if (athleteId) {
+    const { data: athleteRow } = await db
+      .from("athletes")
+      .select("name")
+      .eq("id", athleteId)
+      .single();
+    if (!athleteRow) {
+      return { success: false, error: "Athlete not found." };
+    }
+    name = athleteRow.name;
+  } else {
+    name = (formData.get("name") as string) || "";
+    if (!name) {
+      return { success: false, error: "Name is required when not selecting an athlete." };
+    }
+  }
 
   // Get max sort_order for this game
   const { data: existing } = await db
@@ -101,6 +121,7 @@ export async function addRunner(formData: FormData): Promise<ActionResult<Runner
       name,
       distance,
       notes,
+      athlete_id: athleteId,
       sort_order: sortOrder,
       status: "registered",
     })
@@ -402,8 +423,155 @@ export async function finalizeGame(gameId: string): Promise<ActionResult> {
 }
 
 // ============================================================
+// getAthletes
+// ============================================================
+
+export async function getAthletes(): Promise<Athlete[]> {
+  const db = createAdminClient();
+  const { data } = await db
+    .from("athletes")
+    .select("*")
+    .order("name", { ascending: true });
+  return (data || []).map(mapAthleteRow);
+}
+
+// ============================================================
+// createAthlete
+// ============================================================
+
+export async function createAthlete(formData: FormData): Promise<ActionResult<Athlete>> {
+  const name = (formData.get("name") as string)?.trim();
+  if (!name) {
+    return { success: false, error: "Name is required." };
+  }
+
+  const stravaUrl = (formData.get("stravaUrl") as string) || null;
+  const prsRaw = (formData.get("prs") as string) || "{}";
+
+  let prs: Record<string, number>;
+  try {
+    prs = JSON.parse(prsRaw);
+  } catch {
+    return { success: false, error: "Invalid PR data." };
+  }
+
+  const db = createAdminClient();
+
+  // Handle photo upload if provided
+  let photoUrl: string | null = null;
+  const photoFile = formData.get("photo") as File | null;
+  if (photoFile && photoFile.size > 0) {
+    const ext = photoFile.name.split(".").pop() ?? "jpg";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const bytes = await photoFile.arrayBuffer();
+    const { error: uploadError } = await db.storage
+      .from("athlete-photos")
+      .upload(path, bytes, { contentType: photoFile.type, upsert: false });
+    if (uploadError) {
+      return { success: false, error: `Photo upload failed: ${uploadError.message}` };
+    }
+    const { data: urlData } = db.storage.from("athlete-photos").getPublicUrl(path);
+    photoUrl = urlData.publicUrl;
+  }
+
+  const { data, error } = await db
+    .from("athletes")
+    .insert({ name, strava_url: stravaUrl, photo_url: photoUrl, prs })
+    .select()
+    .single();
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidateAthletesPage();
+  return { success: true, data: mapAthleteRow(data) };
+}
+
+// ============================================================
+// updateAthlete
+// ============================================================
+
+export async function updateAthlete(formData: FormData): Promise<ActionResult<Athlete>> {
+  const athleteId = formData.get("athleteId") as string;
+  const name = (formData.get("name") as string)?.trim();
+  if (!athleteId || !name) {
+    return { success: false, error: "Athlete ID and name are required." };
+  }
+
+  const stravaUrl = (formData.get("stravaUrl") as string) || null;
+  const prsRaw = (formData.get("prs") as string) || "{}";
+
+  let prs: Record<string, number>;
+  try {
+    prs = JSON.parse(prsRaw);
+  } catch {
+    return { success: false, error: "Invalid PR data." };
+  }
+
+  const db = createAdminClient();
+
+  // Handle photo upload if provided
+  let photoUrl: string | undefined; // undefined = don't change
+  const photoFile = formData.get("photo") as File | null;
+  if (photoFile && photoFile.size > 0) {
+    const ext = photoFile.name.split(".").pop() ?? "jpg";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const bytes = await photoFile.arrayBuffer();
+    const { error: uploadError } = await db.storage
+      .from("athlete-photos")
+      .upload(path, bytes, { contentType: photoFile.type, upsert: false });
+    if (uploadError) {
+      return { success: false, error: `Photo upload failed: ${uploadError.message}` };
+    }
+    const { data: urlData } = db.storage.from("athlete-photos").getPublicUrl(path);
+    photoUrl = urlData.publicUrl;
+  }
+
+  const updatePayload: Record<string, unknown> = { name, strava_url: stravaUrl, prs };
+  if (photoUrl !== undefined) {
+    updatePayload.photo_url = photoUrl;
+  }
+
+  const { data, error } = await db
+    .from("athletes")
+    .update(updatePayload)
+    .eq("id", athleteId)
+    .select()
+    .single();
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidateAthletesPage();
+  return { success: true, data: mapAthleteRow(data) };
+}
+
+// ============================================================
+// deleteAthlete
+// ============================================================
+
+export async function deleteAthlete(athleteId: string): Promise<ActionResult> {
+  const db = createAdminClient();
+  const { error } = await db.from("athletes").delete().eq("id", athleteId);
+  if (error) {
+    return { success: false, error: error.message };
+  }
+  revalidateAthletesPage();
+  return { success: true, data: undefined };
+}
+
+// ============================================================
 // Helper: revalidate admin and public pages for a game
 // ============================================================
+
+function revalidateAthletesPage() {
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (adminSecret) {
+    revalidatePath(`/admin/${adminSecret}/athletes`);
+  }
+}
 
 async function revalidateGamePages(gameId: string) {
   const db = createAdminClient();

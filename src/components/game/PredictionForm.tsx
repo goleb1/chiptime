@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import type { Game, Runner } from "@/lib/types";
 import { submitPredictions } from "@/lib/actions/game";
-import { getDefaultTimeForDistance } from "@/lib/utils";
+import { getDefaultTimeForDistance, secondsToTimeString } from "@/lib/utils";
 import { MAX_DNF_BADGES_PER_GUESSER, SUPPORTED_DISTANCES } from "@/lib/constants";
 import TimeInput from "./TimeInput";
 import GameHeader from "./GameHeader";
@@ -161,11 +161,29 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-gray-100">
-                    {runner.name}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
+                      {runner.name}
+                    </p>
+                    {runner.athlete?.stravaUrl && (
+                      <a
+                        href={runner.athlete.stravaUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Strava profile"
+                        className="text-orange-500 hover:text-orange-600"
+                      >
+                        <StravaIcon className="h-4 w-4" />
+                      </a>
+                    )}
+                  </div>
                   {runner.notes && (
                     <p className="text-xs text-gray-500">{runner.notes}</p>
+                  )}
+                  {runner.athlete?.prs?.[runner.distance] && (
+                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                      PR: {secondsToTimeString(runner.athlete.prs[runner.distance])}
+                    </p>
                   )}
                 </div>
               </div>
@@ -224,5 +242,13 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
         Submit Predictions
       </Button>
     </div>
+  );
+}
+
+function StravaIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+    </svg>
   );
 }

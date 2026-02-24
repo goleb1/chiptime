@@ -169,6 +169,7 @@ describe("scoreGuesser", () => {
       actualTimeSeconds: null,
       status: "dnf",
       sortOrder: 0,
+      athleteId: null,
       createdAt: "",
     },
     {
@@ -180,6 +181,7 @@ describe("scoreGuesser", () => {
       actualTimeSeconds: 13338, // 3:42:18
       status: "finished",
       sortOrder: 1,
+      athleteId: null,
       createdAt: "",
     },
     {
@@ -191,6 +193,7 @@ describe("scoreGuesser", () => {
       actualTimeSeconds: 6030, // 1:40:30
       status: "finished",
       sortOrder: 2,
+      athleteId: null,
       createdAt: "",
     },
     {
@@ -202,6 +205,7 @@ describe("scoreGuesser", () => {
       actualTimeSeconds: 1445, // 24:05
       status: "finished",
       sortOrder: 3,
+      athleteId: null,
       createdAt: "",
     },
   ];
@@ -291,6 +295,7 @@ describe("scoreGuesser", () => {
         actualTimeSeconds: null,
         status: "registered",
         sortOrder: 4,
+        athleteId: null,
         createdAt: "",
       },
     ];

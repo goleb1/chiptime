@@ -58,6 +58,17 @@ export interface GuesserScore {
 
 // --- Data Model ---
 
+export interface Athlete {
+  id: string;
+  name: string;
+  stravaUrl: string | null;
+  photoUrl: string | null;
+  /** Keys are distance names (matching SUPPORTED_DISTANCES), values are seconds */
+  prs: Record<string, number>;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Game {
   id: string;
   slug: string;
@@ -81,6 +92,8 @@ export interface Runner {
   actualTimeSeconds: number | null;
   status: RunnerStatus;
   sortOrder: number;
+  athleteId: string | null;
+  athlete?: Athlete;
   createdAt: string;
 }
 

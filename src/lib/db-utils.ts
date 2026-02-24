@@ -1,4 +1,4 @@
-import type { Game, Runner, Guesser, Prediction, Award } from "./types";
+import type { Athlete, Game, Runner, Guesser, Prediction, Award } from "./types";
 
 // ============================================================
 // ActionResult — standard return type for Server Actions
@@ -30,6 +30,18 @@ export function mapGameRow(row: any): Game {
   };
 }
 
+export function mapAthleteRow(row: any): Athlete {
+  return {
+    id: row.id,
+    name: row.name,
+    stravaUrl: row.strava_url,
+    photoUrl: row.photo_url,
+    prs: row.prs ?? {},
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export function mapRunnerRow(row: any): Runner {
   return {
     id: row.id,
@@ -40,6 +52,8 @@ export function mapRunnerRow(row: any): Runner {
     actualTimeSeconds: row.actual_time_seconds,
     status: row.status,
     sortOrder: row.sort_order,
+    athleteId: row.athlete_id ?? null,
+    athlete: row.athletes ? mapAthleteRow(row.athletes) : undefined,
     createdAt: row.created_at,
   };
 }

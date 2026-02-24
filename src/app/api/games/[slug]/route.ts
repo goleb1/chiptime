@@ -21,7 +21,7 @@ export async function GET(
 
   const { data: runnerRows } = await db
     .from("runners")
-    .select("*")
+    .select("*, athletes(*)")
     .eq("game_id", gameRow.id)
     .order("sort_order", { ascending: true });
 
