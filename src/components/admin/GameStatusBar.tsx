@@ -48,7 +48,7 @@ export default function GameStatusBar({
   return (
     <div className="flex items-center gap-4 flex-wrap">
       <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-500">Status:</span>
+        <span className="text-sm text-black/50">Status:</span>
         <StatusBadge status={status} />
       </div>
 

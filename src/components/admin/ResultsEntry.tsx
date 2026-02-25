@@ -27,7 +27,7 @@ export default function ResultsEntry({
     <div className="space-y-6">
       {Object.entries(grouped).map(([distance, distanceRunners]) => (
         <div key={distance}>
-          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          <h3 className="text-sm font-semibold text-black/50 uppercase tracking-wide mb-2">
             {distance}
           </h3>
           <div className="space-y-2">
@@ -85,8 +85,8 @@ function RunnerResultRow({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-md border border-gray-200 dark:border-gray-700 px-4 py-3">
-      <span className="font-medium text-gray-900 dark:text-gray-100 min-w-[120px]">
+    <div className="flex flex-wrap items-center gap-3 rounded-md border border-black/10 px-4 py-3 bg-white/40">
+      <span className="font-medium text-black min-w-[120px]">
         {runner.name}
       </span>
 
@@ -95,7 +95,7 @@ function RunnerResultRow({
       <select
         value={status}
         onChange={(e) => setStatus(e.target.value as RunnerStatus)}
-        className="rounded-md border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 bg-white dark:bg-gray-900"
+        className="rounded-md border border-black/30 px-2 py-1 text-sm bg-white/60 text-black"
       >
         <option value="registered">Registered</option>
         <option value="finished">Finished</option>
@@ -109,7 +109,7 @@ function RunnerResultRow({
           value={timeStr}
           onChange={(e) => setTimeStr(e.target.value)}
           placeholder="H:MM:SS"
-          className="w-28 rounded-md border border-gray-300 px-2 py-1 text-sm dark:border-gray-600 bg-white dark:bg-gray-900"
+          className="w-28 rounded-md border border-black/30 px-2 py-1 text-sm bg-white/60 text-black"
         />
       )}
 
@@ -117,7 +117,7 @@ function RunnerResultRow({
         Save
       </Button>
 
-      {saved && <span className="text-sm text-green-600">Saved</span>}
+      {saved && <span className="text-sm text-green-700">Saved</span>}
       {error && <span className="text-sm text-red-600">{error}</span>}
     </div>
   );

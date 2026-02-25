@@ -105,7 +105,7 @@ export default function RunnerForm({
 
         {/* Athlete selector */}
         <div className="flex flex-col gap-1 relative" ref={dropdownRef}>
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="text-sm font-medium text-black/70">
             Athlete
           </label>
           <div className="flex items-center gap-1">
@@ -120,18 +120,18 @@ export default function RunnerForm({
               onFocus={() => setShowDropdown(true)}
               placeholder={loadingAthletes ? "Loading…" : "Search roster…"}
               disabled={loadingAthletes}
-              className="w-48 rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              className="w-48 rounded-md border border-black/30 px-3 py-2 text-sm bg-white/60 text-black"
             />
             {selectedAthlete && (
-              <span className="text-green-600 text-xs font-medium">✓</span>
+              <span className="text-green-700 text-xs font-medium">✓</span>
             )}
           </div>
 
           {/* Dropdown */}
           {showDropdown && !selectedAthlete && search.length > 0 && (
-            <div className="absolute top-full left-0 z-50 mt-1 w-60 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg max-h-52 overflow-y-auto">
+            <div className="absolute top-full left-0 z-50 mt-1 w-60 rounded-md border border-black/10 bg-cream shadow-lg max-h-52 overflow-y-auto">
               {filtered.length === 0 ? (
-                <div className="px-3 py-2 text-sm text-gray-400">No matches</div>
+                <div className="px-3 py-2 text-sm text-black/40">No matches</div>
               ) : (
                 filtered.map((a) => (
                   <button
@@ -142,12 +142,12 @@ export default function RunnerForm({
                       setSearch(a.name);
                       setShowDropdown(false);
                     }}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 flex items-center gap-2"
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-black/5 text-black flex items-center gap-2"
                   >
                     {a.photoUrl ? (
                       <img src={a.photoUrl} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
                     ) : (
-                      <div className="h-6 w-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center shrink-0 text-xs font-medium text-gray-500">
+                      <div className="h-6 w-6 rounded-full bg-black/10 flex items-center justify-center shrink-0 text-xs font-medium text-black/50">
                         {a.name[0]?.toUpperCase()}
                       </div>
                     )}
@@ -161,14 +161,14 @@ export default function RunnerForm({
 
         {/* Distance */}
         <div className="flex flex-col gap-1">
-          <label htmlFor="runner-distance" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label htmlFor="runner-distance" className="text-sm font-medium text-black/70">
             Distance
           </label>
           <select
             id="runner-distance"
             name="distance"
             required
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+            className="rounded-md border border-black/30 px-3 py-2 text-sm bg-white/60 text-black"
           >
             {distances.map((d) => (
               <option key={d} value={d}>{d}</option>
@@ -193,13 +193,13 @@ export default function RunnerForm({
         <button
           type="button"
           onClick={() => setShowQuickAdd(true)}
-          className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+          className="text-sm text-track-red hover:underline"
         >
           + Add new athlete to roster
         </button>
       ) : (
-        <div className="rounded-md border border-gray-200 dark:border-gray-700 p-4 space-y-3">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Quick-add athlete</p>
+        <div className="rounded-md border border-black/10 p-4 space-y-3 bg-white/40">
+          <p className="text-sm font-medium text-black/70">Quick-add athlete</p>
           <div className="flex flex-wrap gap-3 items-end">
             <Input
               id="quick-name"
@@ -228,7 +228,7 @@ export default function RunnerForm({
           {quickAddError && (
             <p className="text-sm text-red-600">{quickAddError}</p>
           )}
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-black/40">
             PRs and photo can be added later from the Athletes page.
           </p>
         </div>

@@ -3,15 +3,15 @@ import type { GameStatus, RunnerStatus } from "@/lib/types";
 type Status = GameStatus | RunnerStatus;
 
 const statusColors: Record<Status, string> = {
-  setup: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-  predictions_open: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  predictions_locked: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  results_entering: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  finalized: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  registered: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-  finished: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  dnf: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  dns: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  setup: "bg-black/10 text-black/60",
+  predictions_open: "bg-green-100 text-green-800",
+  predictions_locked: "bg-gold/20 text-[#7a5c1a]",
+  results_entering: "bg-track-red/15 text-track-red",
+  finalized: "bg-gold/30 text-[#7a5c1a] font-semibold",
+  registered: "bg-black/10 text-black/60",
+  finished: "bg-green-100 text-green-800",
+  dnf: "bg-red-100 text-red-800",
+  dns: "bg-orange-100 text-orange-800",
 };
 
 const statusLabels: Record<Status, string> = {

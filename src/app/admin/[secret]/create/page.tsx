@@ -9,7 +9,7 @@ export default async function CreateGamePage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+      <h1 className="text-2xl font-bold font-serif text-black">
         Create Game
       </h1>
       <CreateGameForm adminSecret={secret} />

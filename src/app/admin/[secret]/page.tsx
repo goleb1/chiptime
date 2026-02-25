@@ -24,23 +24,23 @@ export default async function AdminDashboard({
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="text-2xl font-bold font-serif text-black">
           Dashboard
         </h1>
         <Link
           href={`/admin/${secret}/create`}
-          className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          className="inline-flex items-center rounded-md bg-track-red px-4 py-2 text-sm font-medium text-white hover:bg-[#5a1a1c] transition-colors"
         >
           Create Game
         </Link>
       </div>
 
       <section>
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+        <h2 className="text-lg font-semibold font-serif text-black mb-3">
           Active Games
         </h2>
         {active.length === 0 ? (
-          <p className="text-sm text-gray-500">No active games.</p>
+          <p className="text-sm text-black/50">No active games.</p>
         ) : (
           <div className="space-y-3">
             {active.map((game) => (
@@ -52,7 +52,7 @@ export default async function AdminDashboard({
 
       {past.length > 0 && (
         <section>
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">
+          <h2 className="text-lg font-semibold font-serif text-black mb-3">
             Past Games
           </h2>
           <div className="space-y-3">
@@ -70,15 +70,15 @@ function GameCard({ game, secret }: { game: Game; secret: string }) {
   return (
     <Link
       href={`/admin/${secret}/game/${game.slug}`}
-      className="block rounded-lg border border-gray-200 dark:border-gray-700 p-4 hover:border-blue-400 transition-colors"
+      className="block rounded-lg border border-black/10 bg-white/50 p-4 hover:border-track-red/40 hover:bg-white/70 transition-colors"
     >
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-medium text-gray-900 dark:text-gray-100">{game.name}</h3>
-          <p className="text-sm text-gray-500 mt-1">
+          <h3 className="font-medium text-black">{game.name}</h3>
+          <p className="text-sm text-black/50 mt-1">
             {game.raceDate} &middot; {game.distances.join(", ")}
           </p>
-          <p className="text-xs text-gray-400 mt-1 font-mono">
+          <p className="text-xs text-black/40 mt-1 font-mono">
             /game/{game.slug}
           </p>
         </div>

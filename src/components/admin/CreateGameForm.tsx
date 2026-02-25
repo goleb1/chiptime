@@ -52,7 +52,7 @@ export default function CreateGameForm({ adminSecret }: { adminSecret: string })
       />
 
       <fieldset>
-        <legend className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <legend className="text-sm font-medium text-black/70 mb-2">
           Distances
         </legend>
         <div className="flex flex-wrap gap-3">

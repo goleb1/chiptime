@@ -150,14 +150,14 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
 
       {/* Photo upload */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="block text-sm font-medium text-black/70">
           Photo
         </label>
         {photoPreview && (
           <img
             src={photoPreview}
             alt="Athlete photo"
-            className="h-20 w-20 rounded-full object-cover border border-gray-200 dark:border-gray-600"
+            className="h-20 w-20 rounded-full object-cover border border-black/10"
           />
         )}
         <input
@@ -166,16 +166,16 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
           name="photo"
           accept="image/*"
           onChange={handlePhotoChange}
-          className="block text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300"
+          className="block text-sm text-black/60 file:mr-3 file:rounded-md file:border-0 file:bg-track-red/10 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-track-red hover:file:bg-track-red/20"
         />
         {isEdit && (
-          <p className="text-xs text-gray-400">Leave empty to keep the current photo.</p>
+          <p className="text-xs text-black/40">Leave empty to keep the current photo.</p>
         )}
       </div>
 
       {/* PRs */}
       <div className="space-y-3">
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <p className="text-sm font-medium text-black/70">
           Personal Records
         </p>
 
@@ -184,7 +184,7 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
           <div className="space-y-2">
             {prRows.map((row) => (
               <div key={row.distance} className="flex items-center gap-2">
-                <span className="w-36 shrink-0 text-sm text-gray-600 dark:text-gray-400">
+                <span className="w-36 shrink-0 text-sm text-black/60">
                   {row.distance}
                 </span>
                 <input
@@ -192,12 +192,12 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
                   value={row.timeStr}
                   onChange={(e) => handleTimeChange(row.distance, e.target.value)}
                   placeholder="H:MM:SS"
-                  className="w-28 rounded-md border border-gray-300 px-2 py-1.5 text-sm font-mono dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                  className="w-28 rounded-md border border-black/30 px-2 py-1.5 text-sm font-mono bg-white/60 text-black"
                 />
                 <button
                   type="button"
                   onClick={() => handleRemovePr(row.distance)}
-                  className="text-gray-400 hover:text-red-500 transition-colors text-lg leading-none"
+                  className="text-black/30 hover:text-red-500 transition-colors text-lg leading-none"
                   title="Remove"
                   aria-label={`Remove ${row.distance} PR`}
                 >
@@ -214,7 +214,7 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
             <select
               value={newDist}
               onChange={(e) => setNewDist(e.target.value)}
-              className="rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              className="rounded-md border border-black/30 px-2 py-1.5 text-sm bg-white/60 text-black"
             >
               {availableDistances.map((d) => (
                 <option key={d.name} value={d.name}>
@@ -227,7 +227,7 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
               value={newTime}
               onChange={(e) => setNewTime(e.target.value)}
               placeholder="H:MM:SS"
-              className="w-28 rounded-md border border-gray-300 px-2 py-1.5 text-sm font-mono dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              className="w-28 rounded-md border border-black/30 px-2 py-1.5 text-sm font-mono bg-white/60 text-black"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
@@ -242,12 +242,12 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
         )}
 
         {prRows.length === 0 && availableDistances.length > 0 && (
-          <p className="text-xs text-gray-400">No PRs added yet. Use the fields above to add one.</p>
+          <p className="text-xs text-black/40">No PRs added yet. Use the fields above to add one.</p>
         )}
       </div>
 
       {state && !state.success && (
-        <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
+        <p className="text-sm text-red-600">{state.error}</p>
       )}
 
       <div className="flex items-center gap-3">

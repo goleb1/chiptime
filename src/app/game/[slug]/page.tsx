@@ -73,7 +73,7 @@ export default async function GamePage({
   if (game.status === "setup") {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500">Predictions aren&apos;t open yet. Check back soon!</p>
+        <p className="text-black/50">Predictions aren&apos;t open yet. Check back soon!</p>
       </div>
     );
   }
@@ -101,10 +101,10 @@ export default async function GamePage({
     <div className="min-h-screen px-4 py-8">
       <div className="w-full max-w-2xl mx-auto space-y-6">
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-2xl font-bold font-serif text-black">
             {game.name}
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-black/50">
             {game.raceDate} &middot; {game.distances.join(", ")}
           </p>
         </div>

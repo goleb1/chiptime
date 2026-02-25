@@ -11,11 +11,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500",
+    "bg-track-red text-white hover:bg-[#5a1a1c] focus:ring-track-red",
   danger:
     "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
   ghost:
-    "bg-transparent text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 focus:ring-gray-400",
+    "bg-transparent text-black hover:bg-black/10 focus:ring-black/30",
 };
 
 export default function Button({

@@ -40,7 +40,7 @@ export default function AthletesPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Athletes</h1>
+        <h1 className="text-2xl font-bold font-serif text-black">Athletes</h1>
         {!showCreate && !editing && (
           <Button onClick={() => setShowCreate(true)}>Add Athlete</Button>
         )}
@@ -48,8 +48,8 @@ export default function AthletesPage() {
 
       {/* Create form */}
       {showCreate && (
-        <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">New Athlete</h2>
+        <div className="rounded-lg border border-black/10 bg-white/50 p-6 space-y-4">
+          <h2 className="text-lg font-semibold font-serif text-black">New Athlete</h2>
           <AthleteForm
             onDone={() => { setShowCreate(false); fetchAthletes(); }}
             onCancel={() => setShowCreate(false)}
@@ -59,8 +59,8 @@ export default function AthletesPage() {
 
       {/* Edit form */}
       {editing && (
-        <div className="rounded-lg border border-blue-200 dark:border-blue-700 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+        <div className="rounded-lg border border-track-red/30 bg-white/50 p-6 space-y-4">
+          <h2 className="text-lg font-semibold font-serif text-black">
             Edit — {editing.name}
           </h2>
           <AthleteForm
@@ -73,15 +73,15 @@ export default function AthletesPage() {
 
       {/* Athlete list */}
       {loading ? (
-        <p className="text-sm text-gray-500">Loading…</p>
+        <p className="text-sm text-black/50">Loading…</p>
       ) : athletes.length === 0 ? (
-        <p className="text-sm text-gray-500">No athletes yet. Add one to get started.</p>
+        <p className="text-sm text-black/50">No athletes yet. Add one to get started.</p>
       ) : (
         <div className="space-y-3">
           {athletes.map((athlete) => (
             <div
               key={athlete.id}
-              className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center gap-4"
+              className="rounded-lg border border-black/10 bg-white/50 p-4 flex items-center gap-4"
             >
               {/* Photo */}
               {athlete.photoUrl ? (
@@ -91,8 +91,8 @@ export default function AthletesPage() {
                   className="h-12 w-12 rounded-full object-cover shrink-0"
                 />
               ) : (
-                <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
-                  <span className="text-lg font-semibold text-gray-400">
+                <div className="h-12 w-12 rounded-full bg-black/10 flex items-center justify-center shrink-0">
+                  <span className="text-lg font-semibold text-black/40">
                     {athlete.name[0]?.toUpperCase()}
                   </span>
                 </div>
@@ -101,7 +101,7 @@ export default function AthletesPage() {
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{athlete.name}</p>
+                  <p className="font-medium text-black">{athlete.name}</p>
                   {athlete.stravaUrl && (
                     <a
                       href={athlete.stravaUrl}
@@ -114,7 +114,7 @@ export default function AthletesPage() {
                     </a>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-black/50 mt-0.5">
                   {prCount(athlete) > 0
                     ? `${prCount(athlete)} PR${prCount(athlete) !== 1 ? "s" : ""} recorded · ` +
                       SUPPORTED_DISTANCES

@@ -77,10 +77,10 @@ export default async function ResultsPage({
       <div className="w-full max-w-2xl mx-auto space-y-6">
         {/* Game header */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-2xl font-bold font-serif text-black">
             {game.name}
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-black/50">
             {game.raceDate} &middot; {game.distances.join(", ")}
           </p>
           {game.officialResultsUrl && (
@@ -88,7 +88,7 @@ export default async function ResultsPage({
               href={game.officialResultsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-blue-600 hover:underline"
+              className="text-sm text-track-red hover:underline"
             >
               Official results &rarr;
             </a>

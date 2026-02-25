@@ -16,24 +16,24 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <nav className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+    <div className="min-h-screen bg-cream">
+      <nav className="border-b border-black/10 bg-black">
         <div className="mx-auto max-w-5xl px-4 py-3 flex items-center gap-6">
           <Link
             href={`/admin/${secret}`}
-            className="text-lg font-bold text-indigo-600 dark:text-indigo-400"
+            className="text-lg font-bold font-serif text-cream hover:text-gold transition-colors"
           >
-            ChipTime Admin
+            Chiptime Admin
           </Link>
           <Link
             href={`/admin/${secret}/create`}
-            className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            className="text-sm text-cream/70 hover:text-cream transition-colors"
           >
             Create Game
           </Link>
           <Link
             href={`/admin/${secret}/athletes`}
-            className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+            className="text-sm text-cream/70 hover:text-cream transition-colors"
           >
             Athletes
           </Link>

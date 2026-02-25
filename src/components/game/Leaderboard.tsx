@@ -10,8 +10,9 @@ import type {
   Award,
 } from "@/lib/types";
 import { LEADERBOARD_POLL_INTERVAL_MS, SUPPORTED_DISTANCES } from "@/lib/constants";
-import { secondsToTimeString, formatErrorPercentage } from "@/lib/utils";
+import { formatErrorPercentage } from "@/lib/utils";
 import AwardBadge from "./AwardBadge";
+import DigitalTime from "@/components/ui/DigitalTime";
 
 export interface LeaderboardData {
   game: Game;
@@ -91,27 +92,27 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
   return (
     <div className="w-full max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+        <h2 className="text-xl font-bold font-serif text-black">
           Leaderboard
         </h2>
         {isLive && (
-          <span className="text-xs text-amber-600 dark:text-amber-400 animate-pulse">
+          <span className="text-xs text-gold animate-pulse">
             Live — updating every 30s
           </span>
         )}
         {isFinalized && (
-          <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+          <span className="text-xs text-green-700 font-medium">
             Final
           </span>
         )}
       </div>
 
       {data.guessers.length === 0 ? (
-        <p className="text-gray-500 text-sm">No predictions submitted yet.</p>
+        <p className="text-black/50 text-sm">No predictions submitted yet.</p>
       ) : (
-        <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+        <div className="border border-black/10 rounded-lg overflow-hidden">
           {/* Header */}
-          <div className="grid grid-cols-[2rem_1fr_auto_3.5rem_2rem] gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <div className="grid grid-cols-[2rem_1fr_auto_3.5rem_2rem] gap-2 px-4 py-2 bg-black/5 text-xs font-medium text-black/50 uppercase tracking-wide">
             <span>#</span>
             <span>Name</span>
             <span />
@@ -128,17 +129,17 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
             return (
               <div
                 key={guesser.id}
-                className="border-t border-gray-200 dark:border-gray-700"
+                className="border-t border-black/10"
               >
                 {/* Main row */}
                 <button
                   onClick={() => toggleExpanded(guesser.id)}
-                  className="w-full grid grid-cols-[2rem_1fr_auto_3.5rem_2rem] gap-2 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  className="w-full grid grid-cols-[2rem_1fr_auto_3.5rem_2rem] gap-2 px-4 py-3 text-left hover:bg-black/5 transition-colors"
                 >
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  <span className="text-sm font-medium text-black/40">
                     {guesser.rank ?? "—"}
                   </span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate min-w-0">
+                  <span className="text-sm font-medium text-black truncate min-w-0">
                     {guesser.name}
                   </span>
                   <span className="flex items-center gap-1 shrink-0">
@@ -146,17 +147,17 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                       <AwardBadge key={`${a.guesserId}-${a.awardType}-${i}`} awardType={a.awardType} />
                     ))}
                   </span>
-                  <span className="text-sm text-right text-gray-700 dark:text-gray-300 font-mono">
+                  <span className="text-sm text-right text-black/70 font-mono">
                     {guesser.totalScore ?? "—"}
                   </span>
-                  <span className="text-right text-xs text-gray-400">
+                  <span className="text-right text-xs text-black/40">
                     {isExpanded ? "▲" : "▼"}
                   </span>
                 </button>
 
                 {/* Expanded detail */}
                 {isExpanded && (
-                  <div className="px-4 pb-3 bg-gray-50 dark:bg-gray-800/50">
+                  <div className="px-4 pb-3 bg-black/5">
                     <div className="space-y-1">
                       {sortedRunners.map((runner) => {
                         const pred = predictions.find(
@@ -171,17 +172,17 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                         return (
                           <div
                             key={runner.id}
-                            className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs items-center py-1.5 border-b border-gray-100 dark:border-gray-700/50 last:border-b-0 sm:grid-cols-[1fr_5rem_5rem_4rem_3.5rem] sm:gap-2 sm:py-1"
+                            className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs items-center py-1.5 border-b border-black/10 last:border-b-0 sm:grid-cols-[1fr_5rem_5rem_4rem_3.5rem] sm:gap-2 sm:py-1"
                           >
                             {/* Runner name + distance */}
-                            <span className="text-gray-700 dark:text-gray-300 truncate col-span-2 sm:col-span-1">
+                            <span className="text-black/70 truncate col-span-2 sm:col-span-1">
                               {runner.name}
-                              <span className="text-gray-400 ml-1">
+                              <span className="text-black/40 ml-1">
                                 ({runner.distance})
                               </span>
                               {pred.dnfBadge && (
                                 <span
-                                  className="ml-1 text-red-500"
+                                  className="ml-1 text-track-red"
                                   title="DNF Call"
                                 >
                                   DNF
@@ -190,34 +191,32 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                             </span>
 
                             {/* Predicted time */}
-                            <span className="text-gray-500 dark:text-gray-400 font-mono sm:text-right">
-                              <span className="text-gray-400 sm:hidden">Pred: </span>
-                              {secondsToTimeString(pred.predictedTimeSeconds)}
+                            <span className="sm:text-right">
+                              <span className="text-black/40 sm:hidden text-[10px]">Pred: </span>
+                              <DigitalTime seconds={pred.predictedTimeSeconds} />
                             </span>
 
                             {/* Actual time */}
-                            <span className="font-mono text-gray-500 dark:text-gray-400 text-right sm:text-right">
+                            <span className="text-right sm:text-right">
                               {!hasResult ? (
-                                <span className="text-amber-500 text-[10px]">
-                                  Awaiting
-                                </span>
+                                <DigitalTime seconds={null} />
                               ) : isDnf ? (
-                                <span className="text-red-500">DNF</span>
+                                <span className="text-track-red font-medium">DNF</span>
                               ) : (
-                                secondsToTimeString(runner.actualTimeSeconds!)
+                                <DigitalTime seconds={runner.actualTimeSeconds!} />
                               )}
                             </span>
 
                             {/* Error % */}
-                            <span className="text-gray-500 dark:text-gray-400 sm:text-right">
-                              <span className="text-gray-400 sm:hidden">Err: </span>
+                            <span className="text-black/50 sm:text-right">
+                              <span className="text-black/40 sm:hidden">Err: </span>
                               {pred.errorPercentage != null
                                 ? formatErrorPercentage(pred.errorPercentage)
                                 : "—"}
                             </span>
 
                             {/* Score */}
-                            <span className="text-right font-mono font-medium text-gray-700 dark:text-gray-300">
+                            <span className="text-right font-mono font-medium text-black/70">
                               {pred.score != null ? pred.score : "—"}
                             </span>
                           </div>

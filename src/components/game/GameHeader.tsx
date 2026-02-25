@@ -41,15 +41,15 @@ export default function GameHeader({ game }: GameHeaderProps) {
 
   return (
     <div className="space-y-2">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+      <h1 className="text-2xl font-bold font-serif text-black">
         {game.name}
       </h1>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-black/50">
         {game.raceDate} &middot; {game.distances.join(", ")}
       </p>
       <p
         className={`text-sm font-medium ${
-          deadlinePassed ? "text-red-600" : "text-green-600"
+          deadlinePassed ? "text-track-red" : "text-green-700"
         }`}
       >
         {deadlinePassed

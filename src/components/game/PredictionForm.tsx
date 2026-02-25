@@ -116,11 +116,11 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
     return (
       <div className="mx-auto max-w-lg space-y-6 py-8">
         <GameHeader game={game} />
-        <div className="rounded-lg border border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800 p-6 text-center space-y-2">
-          <p className="text-lg font-semibold text-green-800 dark:text-green-300">
+        <div className="rounded-lg border border-green-200 bg-green-50 p-6 text-center space-y-2">
+          <p className="text-lg font-semibold text-green-800">
             Predictions submitted!
           </p>
-          <p className="text-sm text-green-700 dark:text-green-400">
+          <p className="text-sm text-green-700">
             Redirecting to results...
           </p>
         </div>
@@ -133,8 +133,8 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
       <GameHeader game={game} />
 
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800 p-3">
-          <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+        <div className="rounded-md border border-red-200 bg-red-50 p-3">
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
@@ -151,18 +151,18 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
 
       {groupedRunners.map((group) => (
         <section key={group.distance} className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+          <h2 className="text-lg font-semibold font-serif text-black">
             {group.distance}
           </h2>
           {group.runners.map((runner) => (
             <div
               key={runner.id}
-              className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3"
+              className="rounded-lg border border-black/15 p-4 space-y-3 bg-white/40"
             >
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <p className="font-medium text-gray-900 dark:text-gray-100">
+                    <p className="font-medium text-black">
                       {runner.name}
                     </p>
                     {runner.athlete?.stravaUrl && (
@@ -178,10 +178,10 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
                     )}
                   </div>
                   {runner.notes && (
-                    <p className="text-xs text-gray-500">{runner.notes}</p>
+                    <p className="text-xs text-black/50">{runner.notes}</p>
                   )}
                   {runner.athlete?.prs?.[runner.distance] && (
-                    <p className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+                    <p className="text-xs text-track-red font-medium">
                       PR: {secondsToTimeString(runner.athlete.prs[runner.distance])}
                     </p>
                   )}
@@ -218,9 +218,9 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
                       [runner.id]: e.target.checked,
                     }))
                   }
-                  className="rounded border-gray-300"
+                  className="rounded border-black/30 accent-track-red"
                 />
-                <span className="text-gray-700 dark:text-gray-300">
+                <span className="text-black/70">
                   DNF Call
                 </span>
               </label>
@@ -229,7 +229,7 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
         </section>
       ))}
 
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-black/50">
         DNF Calls used: {dnfCount} of {MAX_DNF_BADGES_PER_GUESSER}
       </p>
 

@@ -96,13 +96,13 @@ function ScrollColumn({
 
   return (
     <div className="flex flex-col items-center">
-      <span className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">
+      <span className="text-[10px] text-black/40 uppercase tracking-wide mb-1">
         {label}
       </span>
       <div className="relative" style={{ height: ITEM_HEIGHT * VISIBLE_ITEMS }}>
         {/* Highlight band */}
         <div
-          className="absolute inset-x-0 pointer-events-none bg-blue-50 dark:bg-blue-900/30 border-y border-blue-200 dark:border-blue-700 z-10"
+          className="absolute inset-x-0 pointer-events-none bg-track-red/10 border-y border-track-red/30 z-10"
           style={{
             top: PADDING_ITEMS * ITEM_HEIGHT,
             height: ITEM_HEIGHT,
@@ -127,8 +127,8 @@ function ScrollColumn({
                 onClick={() => handleItemClick(v)}
                 className={`flex items-center justify-center text-sm font-mono cursor-pointer select-none transition-colors ${
                   isSelected
-                    ? "text-blue-700 dark:text-blue-300 font-semibold"
-                    : "text-gray-400 dark:text-gray-500"
+                    ? "text-track-red font-semibold"
+                    : "text-black/30"
                 } ${disabled ? "opacity-50 cursor-default" : ""}`}
                 style={{
                   height: ITEM_HEIGHT,
@@ -181,7 +181,7 @@ export default function TimeInput({
         disabled={disabled}
         label="hr"
       />
-      <span className="text-gray-400 font-medium text-lg pb-8">:</span>
+      <span className="text-black/30 font-medium text-lg pb-8">:</span>
       <ScrollColumn
         values={MINUTES}
         selected={minutes}
@@ -190,7 +190,7 @@ export default function TimeInput({
         label="min"
         padDisplay
       />
-      <span className="text-gray-400 font-medium text-lg pb-8">:</span>
+      <span className="text-black/30 font-medium text-lg pb-8">:</span>
       <ScrollColumn
         values={SECONDS}
         selected={seconds}

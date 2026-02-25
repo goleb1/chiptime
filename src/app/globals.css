@@ -1,26 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --brand: #4f46e5;
-  --brand-light: #818cf8;
+  --background: #dcd0b9;
+  --foreground: #000000;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --brand: #818cf8;
-    --brand-light: #a5b4fc;
-  }
+  --color-track-red: #732123;
+  --color-gold: #b2934e;
+  --color-cream: #dcd0b9;
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
+  --font-mono: var(--font-share-tech-mono);
+  --font-digital: var(--font-share-tech-mono);
 }
 
 body {
@@ -41,4 +35,22 @@ a {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Digital time display panel */
+.digital-time {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-digital, "Courier New", monospace);
+  background-color: #111;
+  color: #c44444;
+  border-radius: 4px;
+  padding: 2px 8px;
+  letter-spacing: 0.08em;
+  font-size: 0.9em;
+  font-variant-numeric: tabular-nums;
+}
+
+.digital-time.awaiting {
+  color: #553333;
 }

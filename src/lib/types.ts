@@ -1,5 +1,5 @@
 // ============================================================
-// ChipTime — Core Type Definitions
+// Chiptime — Core Type Definitions
 // Source of truth: chiptime_mvp_prd.md Section 4
 // ============================================================
 

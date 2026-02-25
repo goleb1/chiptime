@@ -63,20 +63,20 @@ export default function AdminGameView({
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="text-2xl font-bold font-serif text-black">
           {game.name}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-black/50 mt-1">
           {game.raceDate} &middot; {game.distances.join(", ")}
         </p>
-        <p className="text-sm text-gray-400 mt-1">
+        <p className="text-sm text-black/40 mt-1">
           Share link:{" "}
-          <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">
+          <code className="bg-black/10 px-1 py-0.5 rounded text-xs">
             {shareUrl}
           </code>
         </p>
         {showGuesserCount && (
-          <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+          <p className="text-sm text-track-red mt-1">
             {guesserCount} {guesserCount === 1 ? "guesser" : "guessers"} submitted
           </p>
         )}
@@ -87,14 +87,14 @@ export default function AdminGameView({
       {/* During results entry, show a single combined runners + results view */}
       {showResultsEntry ? (
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+          <h2 className="text-lg font-semibold font-serif text-black">
             Runners & Results
           </h2>
           <ResultsEntry runners={runners} gameId={game.id} onMutate={onMutate} />
         </section>
       ) : (
         <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+          <h2 className="text-lg font-semibold font-serif text-black">
             Runners
           </h2>
 
@@ -108,7 +108,7 @@ export default function AdminGameView({
 
       {game.status === "finalized" && (
         <section>
-          <p className="text-green-600 font-medium">
+          <p className="text-green-700 font-medium">
             This game has been finalized. Scores and awards have been computed.
           </p>
         </section>
