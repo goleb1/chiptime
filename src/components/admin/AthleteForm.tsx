@@ -19,6 +19,11 @@ async function updateAthleteAction(_prev: FormState, formData: FormData): Promis
   return updateAthlete(formData);
 }
 
+interface PrRow {
+  distance: string;
+  timeStr: string;
+}
+
 interface AthleteFormProps {
   /** Provide to edit an existing athlete; omit for create */
   athlete?: Athlete;
@@ -26,18 +31,42 @@ interface AthleteFormProps {
   onCancel?: () => void;
 }
 
+// Sort PR rows to match SUPPORTED_DISTANCES order
+function sortPrRows(rows: PrRow[]): PrRow[] {
+  return [...rows].sort((a, b) => {
+    const ai = SUPPORTED_DISTANCES.findIndex((d) => d.name === a.distance);
+    const bi = SUPPORTED_DISTANCES.findIndex((d) => d.name === b.distance);
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+  });
+}
+
 export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormProps) {
   const isEdit = !!athlete;
 
-  // PR state: distance name → time string (e.g. "1:42:30") or "" for none
-  const [prs, setPrs] = useState<Record<string, string>>(() => {
-    const init: Record<string, string> = {};
-    for (const d of SUPPORTED_DISTANCES) {
-      const secs = athlete?.prs?.[d.name];
-      init[d.name] = secs ? secondsToTimeString(secs) : "";
+  // Only the explicitly-added PRs
+  const [prRows, setPrRows] = useState<PrRow[]>(() =>
+    sortPrRows(
+      Object.entries(athlete?.prs ?? {}).map(([distance, secs]) => ({
+        distance,
+        timeStr: secondsToTimeString(secs),
+      }))
+    )
+  );
+
+  // "Add PR" input state
+  const usedDistances = new Set(prRows.map((r) => r.distance));
+  const availableDistances = SUPPORTED_DISTANCES.filter((d) => !usedDistances.has(d.name));
+  const [newDist, setNewDist] = useState<string>(availableDistances[0]?.name ?? "");
+  const [newTime, setNewTime] = useState("");
+
+  // Keep newDist in sync if rows change and current selection gets used
+  useEffect(() => {
+    const used = new Set(prRows.map((r) => r.distance));
+    const avail = SUPPORTED_DISTANCES.filter((d) => !used.has(d.name));
+    if (avail.length > 0 && (!newDist || used.has(newDist))) {
+      setNewDist(avail[0].name);
     }
-    return init;
-  });
+  }, [prRows, newDist]);
 
   const [photoPreview, setPhotoPreview] = useState<string | null>(athlete?.photoUrl ?? null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,13 +84,13 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
 
   function buildPrsJson(): string {
     const result: Record<string, number> = {};
-    for (const [dist, val] of Object.entries(prs)) {
-      if (!val.trim()) continue;
+    for (const { distance, timeStr } of prRows) {
+      if (!timeStr.trim()) continue;
       try {
-        const secs = timeStringToSeconds(val.trim());
-        if (secs > 0) result[dist] = secs;
+        const secs = timeStringToSeconds(timeStr.trim());
+        if (secs > 0) result[distance] = secs;
       } catch {
-        // ignore invalid entries; server-side validation will catch it
+        // ignore invalid entries
       }
     }
     return JSON.stringify(result);
@@ -74,10 +103,25 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
     }
   }
 
+  function handleAddPr() {
+    if (!newDist) return;
+    setPrRows((prev) => sortPrRows([...prev, { distance: newDist, timeStr: newTime }]));
+    setNewTime("");
+  }
+
+  function handleRemovePr(distance: string) {
+    setPrRows((prev) => prev.filter((r) => r.distance !== distance));
+  }
+
+  function handleTimeChange(distance: string, value: string) {
+    setPrRows((prev) =>
+      prev.map((r) => (r.distance === distance ? { ...r, timeStr: value } : r))
+    );
+  }
+
   return (
     <form
       action={(fd) => {
-        // Inject the serialized PRs before submitting
         fd.set("prs", buildPrsJson());
         action(fd);
       }}
@@ -132,24 +176,74 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
       {/* PRs */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Personal Records <span className="font-normal text-gray-400">(H:MM:SS or M:SS — leave blank if unknown)</span>
+          Personal Records
         </p>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {SUPPORTED_DISTANCES.map((d) => (
-            <div key={d.name} className="flex items-center gap-2">
-              <label className="w-32 shrink-0 text-sm text-gray-600 dark:text-gray-400">
-                {d.name}
-              </label>
-              <input
-                type="text"
-                value={prs[d.name]}
-                onChange={(e) => setPrs((prev) => ({ ...prev, [d.name]: e.target.value }))}
-                placeholder="—"
-                className="w-28 rounded-md border border-gray-300 px-2 py-1.5 text-sm font-mono dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-300"
-              />
-            </div>
-          ))}
-        </div>
+
+        {/* Existing PR rows */}
+        {prRows.length > 0 && (
+          <div className="space-y-2">
+            {prRows.map((row) => (
+              <div key={row.distance} className="flex items-center gap-2">
+                <span className="w-36 shrink-0 text-sm text-gray-600 dark:text-gray-400">
+                  {row.distance}
+                </span>
+                <input
+                  type="text"
+                  value={row.timeStr}
+                  onChange={(e) => handleTimeChange(row.distance, e.target.value)}
+                  placeholder="H:MM:SS"
+                  className="w-28 rounded-md border border-gray-300 px-2 py-1.5 text-sm font-mono dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemovePr(row.distance)}
+                  className="text-gray-400 hover:text-red-500 transition-colors text-lg leading-none"
+                  title="Remove"
+                  aria-label={`Remove ${row.distance} PR`}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add PR row */}
+        {availableDistances.length > 0 && (
+          <div className="flex items-center gap-2 pt-1">
+            <select
+              value={newDist}
+              onChange={(e) => setNewDist(e.target.value)}
+              className="rounded-md border border-gray-300 px-2 py-1.5 text-sm dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+            >
+              {availableDistances.map((d) => (
+                <option key={d.name} value={d.name}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              value={newTime}
+              onChange={(e) => setNewTime(e.target.value)}
+              placeholder="H:MM:SS"
+              className="w-28 rounded-md border border-gray-300 px-2 py-1.5 text-sm font-mono dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddPr();
+                }
+              }}
+            />
+            <Button type="button" variant="ghost" onClick={handleAddPr}>
+              Add PR
+            </Button>
+          </div>
+        )}
+
+        {prRows.length === 0 && availableDistances.length > 0 && (
+          <p className="text-xs text-gray-400">No PRs added yet. Use the fields above to add one.</p>
+        )}
       </div>
 
       {state && !state.success && (

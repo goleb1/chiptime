@@ -27,15 +27,24 @@ export const DNF_NO_BADGE_POINTS = 0;
 // ============================================================
 
 export const SUPPORTED_DISTANCES: DistanceDefault[] = [
-  { name: "Mile", defaultTimeSeconds: 360 }, // 0:06:00
-  { name: "5K", defaultTimeSeconds: 1500 }, // 0:25:00
-  { name: "10K", defaultTimeSeconds: 3000 }, // 0:50:00
-  { name: "10mi", defaultTimeSeconds: 4800 }, // 1:20:00
-  { name: "Half Marathon", defaultTimeSeconds: 6300 }, // 1:45:00
-  { name: "Full Marathon", defaultTimeSeconds: 12600 }, // 3:30:00
-  { name: "50K", defaultTimeSeconds: 18000 }, // 5:00:00
-  { name: "100K", defaultTimeSeconds: 43200 }, // 12:00:00
-  { name: "100mi", defaultTimeSeconds: 86400 }, // 24:00:00
+  { name: "100m",           defaultTimeSeconds: 12 },     // 0:00:12
+  { name: "200m",           defaultTimeSeconds: 25 },     // 0:00:25
+  { name: "400m",           defaultTimeSeconds: 55 },     // 0:00:55
+  { name: "800m",           defaultTimeSeconds: 130 },    // 0:02:10
+  { name: "1 Mile",         defaultTimeSeconds: 360 },    // 0:06:00
+  { name: "2 Mile",         defaultTimeSeconds: 780 },    // 0:13:00
+  { name: "5K",             defaultTimeSeconds: 1500 },   // 0:25:00
+  { name: "5 Mile",         defaultTimeSeconds: 2100 },   // 0:35:00
+  { name: "10K",            defaultTimeSeconds: 3000 },   // 0:50:00
+  { name: "10 Mile",        defaultTimeSeconds: 4800 },   // 1:20:00
+  { name: "Half Marathon",  defaultTimeSeconds: 6300 },   // 1:45:00
+  { name: "15 Mile",        defaultTimeSeconds: 7500 },   // 2:05:00
+  { name: "20 Mile",        defaultTimeSeconds: 9600 },   // 2:40:00
+  { name: "Full Marathon",  defaultTimeSeconds: 12600 },  // 3:30:00
+  { name: "50K",            defaultTimeSeconds: 18000 },  // 5:00:00
+  { name: "50 Mile",        defaultTimeSeconds: 36000 },  // 10:00:00
+  { name: "100K",           defaultTimeSeconds: 43200 },  // 12:00:00
+  { name: "100 Mile",       defaultTimeSeconds: 86400 },  // 24:00:00
 ];
 
 export const DISTANCE_NAMES = SUPPORTED_DISTANCES.map((d) => d.name);
