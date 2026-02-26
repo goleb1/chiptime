@@ -112,7 +112,7 @@ function ScrollColumn({
           ref={containerRef}
           onScroll={disabled ? undefined : handleScroll}
           className="h-full w-16 overflow-y-auto scrollbar-hide relative z-20"
-          style={{ scrollSnapType: "y mandatory" }}
+          style={{ scrollSnapType: "y mandatory", scrollPaddingTop: PADDING_ITEMS * ITEM_HEIGHT }}
           aria-label={label}
         >
           {/* Top padding */}
