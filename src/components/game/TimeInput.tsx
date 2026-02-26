@@ -111,7 +111,7 @@ function ScrollColumn({
         <div
           ref={containerRef}
           onScroll={disabled ? undefined : handleScroll}
-          className="h-full w-16 overflow-y-auto scrollbar-hide relative z-20"
+          className="h-full w-full overflow-y-auto scrollbar-hide relative z-20"
           style={{ scrollSnapType: "y mandatory", scrollPaddingTop: PADDING_ITEMS * ITEM_HEIGHT }}
           aria-label={label}
         >
@@ -173,32 +173,38 @@ export default function TimeInput({
   );
 
   return (
-    <div className="flex items-end gap-0.5">
-      <ScrollColumn
-        values={HOURS}
-        selected={hours}
-        onSelect={(v) => handleSelect("hours", v)}
-        disabled={disabled}
-        label="hr"
-      />
+    <div className="flex items-end gap-0.5 w-full">
+      <div className="flex-1 min-w-0">
+        <ScrollColumn
+          values={HOURS}
+          selected={hours}
+          onSelect={(v) => handleSelect("hours", v)}
+          disabled={disabled}
+          label="hr"
+        />
+      </div>
       <span className="text-black/30 font-medium text-lg pb-8">:</span>
-      <ScrollColumn
-        values={MINUTES}
-        selected={minutes}
-        onSelect={(v) => handleSelect("minutes", v)}
-        disabled={disabled}
-        label="min"
-        padDisplay
-      />
+      <div className="flex-1 min-w-0">
+        <ScrollColumn
+          values={MINUTES}
+          selected={minutes}
+          onSelect={(v) => handleSelect("minutes", v)}
+          disabled={disabled}
+          label="min"
+          padDisplay
+        />
+      </div>
       <span className="text-black/30 font-medium text-lg pb-8">:</span>
-      <ScrollColumn
-        values={SECONDS}
-        selected={seconds}
-        onSelect={(v) => handleSelect("seconds", v)}
-        disabled={disabled}
-        label="sec"
-        padDisplay
-      />
+      <div className="flex-1 min-w-0">
+        <ScrollColumn
+          values={SECONDS}
+          selected={seconds}
+          onSelect={(v) => handleSelect("seconds", v)}
+          disabled={disabled}
+          label="sec"
+          padDisplay
+        />
+      </div>
     </div>
   );
 }

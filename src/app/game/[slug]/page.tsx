@@ -93,16 +93,8 @@ export default async function GamePage({
 
     const runners = (runnerRows || []).map(mapRunnerRow);
 
-    return (
-      <div className="min-h-screen px-4 pt-8">
-        <div className="w-full max-w-2xl mx-auto mb-4">
-          <Link href="/" className="text-sm text-track-red hover:underline">
-            ← Chiptime
-          </Link>
-        </div>
-        <PredictionForm game={game} runners={runners} />
-      </div>
-    );
+    // PredictionForm owns its full-screen layout (sticky header + fixed submit bar)
+    return <PredictionForm game={game} runners={runners} />;
   }
 
   // predictions_locked | results_entering | finalized → show leaderboard

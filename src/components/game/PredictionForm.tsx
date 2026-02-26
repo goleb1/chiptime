@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Game, Runner } from "@/lib/types";
 import { submitPredictions } from "@/lib/actions/game";
 import { getDefaultTimeForDistance, secondsToTimeString, findBestPr } from "@/lib/utils";
 import { MAX_DNF_BADGES_PER_GUESSER, SUPPORTED_DISTANCES } from "@/lib/constants";
 import TimeInput from "./TimeInput";
-import GameHeader from "./GameHeader";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
@@ -34,6 +33,17 @@ function fieldsToSeconds(f: TimeFields): number {
   return f.hours * 3600 + f.minutes * 60 + f.seconds;
 }
 
+function formatCompactCountdown(ms: number): string {
+  if (!isFinite(ms) || ms <= 0) return "Closed";
+  const s = Math.floor(ms / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
 export default function PredictionForm({ game, runners }: PredictionFormProps) {
   const router = useRouter();
   const [guesserName, setGuesserName] = useState("");
@@ -55,6 +65,23 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
+  // Live countdown derived from predictionDeadline (= raceStartTime)
+  const [remaining, setRemaining] = useState<number>(() =>
+    game.predictionDeadline
+      ? new Date(game.predictionDeadline).getTime() - Date.now()
+      : Infinity
+  );
+
+  useEffect(() => {
+    if (!game.predictionDeadline) return;
+    const interval = setInterval(() => {
+      setRemaining(new Date(game.predictionDeadline).getTime() - Date.now());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [game.predictionDeadline]);
+
+  const deadlinePassed = remaining <= 0;
+
   const dnfCount = useMemo(
     () => Object.values(dnfBadges).filter(Boolean).length,
     [dnfBadges]
@@ -67,11 +94,9 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
       if (!groups[r.distance]) groups[r.distance] = [];
       groups[r.distance].push(r);
     }
-    // Sort within each group by sortOrder
     for (const dist of Object.keys(groups)) {
       groups[dist].sort((a, b) => a.sortOrder - b.sortOrder);
     }
-    // Sort group keys by SUPPORTED_DISTANCES index
     const sortedDistances = Object.keys(groups).sort((a, b) => {
       const ai = SUPPORTED_DISTANCES.findIndex((d) => d.name === a);
       const bi = SUPPORTED_DISTANCES.findIndex((d) => d.name === b);
@@ -79,10 +104,6 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
     });
     return sortedDistances.map((dist) => ({ distance: dist, runners: groups[dist] }));
   }, [runners]);
-
-  const deadlinePassed = game.predictionDeadline
-    ? new Date() >= new Date(game.predictionDeadline)
-    : false;
 
   const canSubmit =
     guesserName.trim().length > 0 &&
@@ -114,162 +135,214 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
     }
   }
 
+  // ─── Sticky header (shared between submitted + main views) ───
+  const stickyHeader = (
+    <header className="fixed top-0 inset-x-0 h-11 bg-track-red z-40 flex items-center justify-between px-4">
+      <span className="font-mono text-white font-bold text-sm tracking-wide">Chiptime</span>
+      <span className="font-mono text-white/80 text-xs">
+        {deadlinePassed ? "Closed" : formatCompactCountdown(remaining)}
+      </span>
+    </header>
+  );
+
   if (submitted) {
     return (
-      <div className="mx-auto max-w-lg space-y-6 py-8">
-        <GameHeader game={game} />
-        <div className="rounded-lg border border-green-200 bg-green-50 p-6 text-center space-y-2">
-          <p className="text-lg font-semibold text-green-800">
-            Predictions submitted!
-          </p>
-          <p className="text-sm text-green-700">
-            Redirecting to results...
-          </p>
+      <div className="min-h-screen bg-cream">
+        {stickyHeader}
+        <div className="pt-11 flex items-center justify-center min-h-screen">
+          <div className="rounded-lg border border-green-200 bg-green-50 p-6 text-center space-y-2 mx-4">
+            <p className="text-lg font-semibold text-green-800">Predictions submitted!</p>
+            <p className="text-sm text-green-700">Redirecting to results…</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-lg space-y-6 py-8">
-      <GameHeader game={game} />
+    <div className="min-h-screen bg-cream pb-24">
+      {stickyHeader}
 
-      {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3">
-          <p className="text-sm text-red-700">{error}</p>
+      {/* ─── Scrollable content (offset for fixed header) ─── */}
+      <div className="pt-11">
+
+        {/* Game info block */}
+        <div className="px-4 py-3 border-b border-black/10 space-y-0.5">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <h1 className="text-xl font-bold font-serif text-black leading-tight">
+              {game.name}
+            </h1>
+            {game.raceWebsiteUrl && (
+              <a
+                href={game.raceWebsiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-medium text-track-red hover:underline shrink-0"
+              >
+                Race website →
+              </a>
+            )}
+          </div>
+          <p className="text-xs text-black/50">
+            {game.raceDate} &middot; {game.distances.join(", ")}
+          </p>
         </div>
-      )}
 
-      <div>
-        <Input
-          id="guesserName"
-          label="Your Name"
-          placeholder="Enter your name"
-          value={guesserName}
-          onChange={(e) => setGuesserName(e.target.value)}
-          disabled={deadlinePassed}
-        />
-      </div>
+        {/* Error banner */}
+        {error && (
+          <div className="mx-4 mt-3 rounded-md border border-red-200 bg-red-50 p-3">
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
 
-      {groupedRunners.map((group) => (
-        <section key={group.distance} className="space-y-4">
-          <h2 className="text-lg font-semibold font-serif text-black">
-            {group.distance}
-          </h2>
-          {group.runners.map((runner) => (
-            <div
-              key={runner.id}
-              className="rounded-lg border border-black/15 p-4 space-y-3 bg-white/40"
-            >
-              <div className="flex items-start gap-3">
-                {runner.athlete && (
-                  runner.athlete.photoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={runner.athlete.photoUrl}
-                      alt={runner.name}
-                      className="h-10 w-10 rounded-full object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-black/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-sm font-medium text-black/50">
-                        {runner.name[0]?.toUpperCase()}
-                      </span>
-                    </div>
-                  )
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-medium text-black">{runner.name}</p>
-                    {(runner.athlete?.gender || runner.athlete?.birthYear) && (
-                      <span className="text-xs font-mono text-black/50">
-                        {runner.athlete.birthYear
-                          ? `${new Date().getFullYear() - runner.athlete.birthYear}${runner.athlete.gender ?? ""}`
-                          : runner.athlete.gender}
-                      </span>
-                    )}
-                    {runner.athlete?.stravaUrl && (
-                      <a
-                        href={runner.athlete.stravaUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Strava profile"
-                        className="text-orange-500 hover:text-orange-600"
-                      >
-                        <StravaIcon className="h-4 w-4" />
-                      </a>
-                    )}
-                  </div>
-                  {runner.notes && (
-                    <p className="text-xs text-black/50 mt-0.5">{runner.notes}</p>
+        {/* Your Name */}
+        <div className="px-4 py-3 border-b border-black/10">
+          <Input
+            id="guesserName"
+            label="Your Name"
+            placeholder="Enter your name"
+            value={guesserName}
+            onChange={(e) => setGuesserName(e.target.value)}
+            disabled={deadlinePassed}
+          />
+        </div>
+
+        {/* Runner sections */}
+        {groupedRunners.map((group) => (
+          <section key={group.distance}>
+            {/* Distance divider */}
+            <div className="px-4 py-2 bg-black/5 border-b border-black/10">
+              <span className="text-xs font-semibold text-black/50 uppercase tracking-wider">
+                {group.distance}
+              </span>
+            </div>
+
+            {group.runners.map((runner) => (
+              <div
+                key={runner.id}
+                className="px-4 py-4 border-b border-black/10 space-y-4"
+              >
+                {/* Athlete identity row */}
+                <div className="flex items-start gap-3">
+                  {runner.athlete && (
+                    runner.athlete.photoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={runner.athlete.photoUrl}
+                        alt={runner.name}
+                        className="h-11 w-11 rounded-full object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="h-11 w-11 rounded-full bg-black/10 flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm font-medium text-black/50">
+                          {runner.name[0]?.toUpperCase()}
+                        </span>
+                      </div>
+                    )
                   )}
-                  {runner.athlete && (() => {
-                    const best = findBestPr(runner.distance, runner.athlete.prs);
-                    if (!best) return null;
-                    return (
-                      <p className="text-xs text-track-red font-medium mt-0.5">
-                        {best.isExact
-                          ? `PR: ${secondsToTimeString(best.seconds)}`
-                          : `PR (${best.distance}): ${secondsToTimeString(best.seconds)}`}
-                      </p>
-                    );
-                  })()}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-semibold text-black">{runner.name}</p>
+                      {(runner.athlete?.gender || runner.athlete?.birthYear) && (
+                        <span className="text-xs font-mono text-black/40">
+                          {runner.athlete.birthYear
+                            ? `${new Date().getFullYear() - runner.athlete.birthYear}${runner.athlete.gender ?? ""}`
+                            : runner.athlete.gender}
+                        </span>
+                      )}
+                      {runner.athlete?.stravaUrl && (
+                        <a
+                          href={runner.athlete.stravaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Strava profile"
+                          className="text-orange-500 hover:text-orange-600"
+                        >
+                          <StravaIcon className="h-4 w-4" />
+                        </a>
+                      )}
+                    </div>
+                    {runner.notes && (
+                      <p className="text-xs text-black/50 mt-0.5">{runner.notes}</p>
+                    )}
+                    {runner.athlete && (() => {
+                      const best = findBestPr(runner.distance, runner.athlete.prs);
+                      if (!best) return null;
+                      return (
+                        <p className="text-xs text-track-red font-medium mt-0.5">
+                          {best.isExact
+                            ? `PR: ${secondsToTimeString(best.seconds)}`
+                            : `PR (${best.distance}): ${secondsToTimeString(best.seconds)}`}
+                        </p>
+                      );
+                    })()}
+                  </div>
                 </div>
-              </div>
 
-              <TimeInput
-                hours={times[runner.id].hours}
-                minutes={times[runner.id].minutes}
-                seconds={times[runner.id].seconds}
-                onChange={() => {
-                  // Total seconds computed via onFieldChange
-                }}
-                onFieldChange={(field, value) => {
-                  setTimes((prev) => ({
-                    ...prev,
-                    [runner.id]: { ...prev[runner.id], [field]: value },
-                  }));
-                }}
-                disabled={deadlinePassed}
-              />
+                {/* Time picker — full width */}
+                <TimeInput
+                  hours={times[runner.id].hours}
+                  minutes={times[runner.id].minutes}
+                  seconds={times[runner.id].seconds}
+                  onChange={() => {}}
+                  onFieldChange={(field, value) => {
+                    setTimes((prev) => ({
+                      ...prev,
+                      [runner.id]: { ...prev[runner.id], [field]: value },
+                    }));
+                  }}
+                  disabled={deadlinePassed}
+                />
 
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={dnfBadges[runner.id]}
+                {/* DNF pill toggle */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (deadlinePassed) return;
+                    if (!dnfBadges[runner.id] && dnfCount >= MAX_DNF_BADGES_PER_GUESSER) return;
+                    setDnfBadges((prev) => ({
+                      ...prev,
+                      [runner.id]: !prev[runner.id],
+                    }));
+                  }}
                   disabled={
                     deadlinePassed ||
                     (!dnfBadges[runner.id] && dnfCount >= MAX_DNF_BADGES_PER_GUESSER)
                   }
-                  onChange={(e) =>
-                    setDnfBadges((prev) => ({
-                      ...prev,
-                      [runner.id]: e.target.checked,
-                    }))
-                  }
-                  className="rounded border-black/30 accent-track-red"
-                />
-                <span className="text-black/70">
-                  DNF Call
-                </span>
-              </label>
-            </div>
-          ))}
-        </section>
-      ))}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                    dnfBadges[runner.id]
+                      ? "bg-track-red text-white border-track-red"
+                      : "bg-transparent text-black/50 border-black/25 hover:border-black/50"
+                  }`}
+                >
+                  <span aria-hidden="true">{dnfBadges[runner.id] ? "✕" : "⚑"}</span>
+                  <span>DNF Call</span>
+                </button>
+              </div>
+            ))}
+          </section>
+        ))}
 
-      <p className="text-sm text-black/50">
-        DNF Calls used: {dnfCount} of {MAX_DNF_BADGES_PER_GUESSER}
-      </p>
+        {/* DNF explainer — shown once after all runners */}
+        <p className="px-4 pt-3 pb-6 text-xs text-black/40 leading-relaxed">
+          <span className="font-medium text-black/50">DNF Call</span> — predict a runner
+          won&apos;t finish the race. You have{" "}
+          {MAX_DNF_BADGES_PER_GUESSER - dnfCount} of {MAX_DNF_BADGES_PER_GUESSER} remaining.
+        </p>
 
-      <Button
-        onClick={handleSubmit}
-        disabled={!canSubmit}
-        loading={submitting}
-        className="w-full"
-      >
-        Submit Predictions
-      </Button>
+      </div>
+
+      {/* ─── Fixed bottom submit bar ─── */}
+      <div className="fixed bottom-0 inset-x-0 bg-cream border-t border-black/15 px-4 py-3 z-30">
+        <Button
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          loading={submitting}
+          className="w-full"
+        >
+          Submit Predictions
+        </Button>
+      </div>
     </div>
   );
 }
