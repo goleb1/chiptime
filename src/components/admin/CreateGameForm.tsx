@@ -34,6 +34,13 @@ export default function CreateGameForm({ adminSecret }: { adminSecret: string })
       <Input id="name" name="name" label="Race Name" placeholder="e.g. Boston Marathon 2025" required />
 
       <Input
+        id="location"
+        name="location"
+        label="Location (optional)"
+        placeholder="e.g. Pittsburgh, PA"
+      />
+
+      <Input
         id="raceStartTime"
         name="raceStartTime"
         label="Race Start Time"

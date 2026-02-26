@@ -90,3 +90,39 @@ export function findBestPr(
 
   return closest ? { ...closest, isExact: false } : null;
 }
+
+/**
+ * Format a YYYY-MM-DD date string to a readable form: "Sun, March 1st, 2026"
+ * Uses the local Date constructor to avoid UTC timezone shifting the date.
+ */
+export function formatRaceDate(dateStr: string): string {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
+  const monthStr = date.toLocaleDateString("en-US", { month: "long" });
+  const suffix = getOrdinalSuffix(day);
+  return `${weekday}, ${monthStr} ${day}${suffix}, ${year}`;
+}
+
+function getOrdinalSuffix(n: number): string {
+  const v = n % 100;
+  if (v >= 11 && v <= 13) return "th";
+  switch (v % 10) {
+    case 1: return "st";
+    case 2: return "nd";
+    case 3: return "rd";
+    default: return "th";
+  }
+}
+
+/**
+ * Format an ISO datetime string to a 12-hour time: "7:00 AM"
+ */
+export function formatRaceTime(isoStr: string): string {
+  const date = new Date(isoStr);
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}

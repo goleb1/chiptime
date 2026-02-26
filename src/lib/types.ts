@@ -82,6 +82,7 @@ export interface Game {
   distances: string[];
   officialResultsUrl: string | null;
   raceWebsiteUrl: string | null;
+  location: string | null;
   predictionDeadline: string; // ISO timestamptz — set equal to raceStartTime on creation
   status: GameStatus;
   showOnHomepage: boolean;

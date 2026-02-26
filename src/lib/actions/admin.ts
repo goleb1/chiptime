@@ -35,6 +35,7 @@ export async function createGame(formData: FormData): Promise<ActionResult<Game>
   const name = formData.get("name") as string;
   const raceStartTime = formData.get("raceStartTime") as string;
   const raceWebsiteUrl = (formData.get("raceWebsiteUrl") as string) || null;
+  const location = (formData.get("location") as string) || null;
   const distancesRaw = formData.getAll("distances") as string[];
 
   if (!name || !raceStartTime || distancesRaw.length === 0) {
@@ -53,6 +54,7 @@ export async function createGame(formData: FormData): Promise<ActionResult<Game>
       race_start_time: raceStartTime,
       prediction_deadline: raceStartTime,
       race_website_url: raceWebsiteUrl,
+      location,
       distances: distancesRaw,
       status: "setup",
     })
@@ -116,6 +118,7 @@ export async function updateGame(formData: FormData): Promise<ActionResult<Game>
   const name = formData.get("name") as string;
   const raceStartTime = formData.get("raceStartTime") as string;
   const raceWebsiteUrl = (formData.get("raceWebsiteUrl") as string) || null;
+  const location = (formData.get("location") as string) || null;
   const distancesRaw = formData.getAll("distances") as string[];
 
   if (!gameId || !name || !raceStartTime || distancesRaw.length === 0) {
@@ -132,6 +135,7 @@ export async function updateGame(formData: FormData): Promise<ActionResult<Game>
       race_start_time: raceStartTime,
       prediction_deadline: raceStartTime,
       race_website_url: raceWebsiteUrl,
+      location,
       distances: distancesRaw,
     })
     .eq("id", gameId)
