@@ -189,6 +189,53 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
         defaultValue={athlete?.stravaUrl ?? ""}
       />
 
+      {/* Gender + Birth Year */}
+      <div className="flex gap-6 items-end">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-black/70">Gender</p>
+          <div className="flex gap-3">
+            {(["M", "F", "NB"] as const).map((g) => (
+              <label key={g} className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="radio"
+                  name="gender"
+                  value={g}
+                  defaultChecked={athlete?.gender === g}
+                  className="accent-track-red"
+                />
+                <span className="text-sm text-black/80">{g === "NB" ? "NB" : g}</span>
+              </label>
+            ))}
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="radio"
+                name="gender"
+                value=""
+                defaultChecked={!athlete?.gender}
+                className="accent-track-red"
+              />
+              <span className="text-sm text-black/50">—</span>
+            </label>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="athlete-birth-year" className="block text-sm font-medium text-black/70">
+            Birth Year
+          </label>
+          <input
+            id="athlete-birth-year"
+            type="number"
+            name="birthYear"
+            placeholder="e.g. 1994"
+            min={1900}
+            max={2099}
+            defaultValue={athlete?.birthYear ?? ""}
+            className="w-28 rounded-md border border-black/30 px-3 py-2 text-sm bg-white/60 text-black"
+          />
+        </div>
+      </div>
+
       {/* Photo upload */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-black/70">

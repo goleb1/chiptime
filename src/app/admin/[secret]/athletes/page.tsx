@@ -102,6 +102,13 @@ export default function AthletesPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-black">{athlete.name}</p>
+                  {(athlete.gender || athlete.birthYear) && (
+                    <span className="text-xs font-mono text-black/50">
+                      {athlete.birthYear
+                        ? `${new Date().getFullYear() - athlete.birthYear}${athlete.gender ?? ""}`
+                        : athlete.gender}
+                    </span>
+                  )}
                   {athlete.stravaUrl && (
                     <a
                       href={athlete.stravaUrl}

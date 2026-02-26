@@ -63,6 +63,8 @@ export interface GuesserScore {
 export interface Athlete {
   id: string;
   name: string;
+  gender: 'M' | 'F' | 'NB' | null;
+  birthYear: number | null;
   stravaUrl: string | null;
   photoUrl: string | null;
   /** Keys are distance names (matching SUPPORTED_DISTANCES), values are seconds */

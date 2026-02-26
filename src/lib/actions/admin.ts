@@ -492,6 +492,9 @@ export async function createAthlete(formData: FormData): Promise<ActionResult<At
   }
 
   const stravaUrl = (formData.get("stravaUrl") as string) || null;
+  const gender = (formData.get("gender") as string) || null;
+  const birthYearRaw = formData.get("birthYear") as string;
+  const birthYear = birthYearRaw ? parseInt(birthYearRaw, 10) : null;
   const prsRaw = (formData.get("prs") as string) || "{}";
 
   let prs: Record<string, number>;
@@ -532,7 +535,7 @@ export async function createAthlete(formData: FormData): Promise<ActionResult<At
 
   const { data, error } = await db
     .from("athletes")
-    .insert({ name, strava_url: stravaUrl, photo_url: photoUrl, prs })
+    .insert({ name, gender, birth_year: birthYear, strava_url: stravaUrl, photo_url: photoUrl, prs })
     .select()
     .single();
 
@@ -556,6 +559,9 @@ export async function updateAthlete(formData: FormData): Promise<ActionResult<At
   }
 
   const stravaUrl = (formData.get("stravaUrl") as string) || null;
+  const gender = (formData.get("gender") as string) || null;
+  const birthYearRaw = formData.get("birthYear") as string;
+  const birthYear = birthYearRaw ? parseInt(birthYearRaw, 10) : null;
   const prsRaw = (formData.get("prs") as string) || "{}";
 
   let prs: Record<string, number>;
@@ -594,7 +600,7 @@ export async function updateAthlete(formData: FormData): Promise<ActionResult<At
     photoUrl = urlData.publicUrl;
   }
 
-  const updatePayload: Record<string, unknown> = { name, strava_url: stravaUrl, prs };
+  const updatePayload: Record<string, unknown> = { name, gender, birth_year: birthYear, strava_url: stravaUrl, prs };
   if (photoUrl !== undefined) {
     updatePayload.photo_url = photoUrl;
   }

@@ -35,6 +35,8 @@ export function mapAthleteRow(row: any): Athlete {
   return {
     id: row.id,
     name: row.name,
+    gender: row.gender ?? null,
+    birthYear: row.birth_year ?? null,
     stravaUrl: row.strava_url,
     photoUrl: row.photo_url,
     prs: row.prs ?? {},
