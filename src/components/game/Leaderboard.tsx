@@ -169,19 +169,10 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                       {rankDisplay(guesser.rank)}
                     </span>
                   </span>
-                  {/* Name + badges stacked — name never gets squeezed */}
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-black truncate">
-                      {guesser.name}
-                    </p>
-                    {awards.length > 0 && (
-                      <div className="flex items-center gap-1 flex-wrap mt-1">
-                        {awards.map((a, i) => (
-                          <AwardBadge key={`${a.guesserId}-${a.awardType}-${i}`} awardType={a.awardType} />
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  {/* Name — always single line, no badge clutter */}
+                  <p className="text-sm font-medium text-black truncate min-w-0">
+                    {guesser.name}
+                  </p>
                   <span className="text-sm text-right text-black/70 font-mono pt-0.5">
                     {guesser.totalScore ?? "—"}
                   </span>
@@ -193,6 +184,14 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                 {/* Expanded detail */}
                 {isExpanded && (
                   <div className="px-4 pb-1 bg-black/5">
+                    {/* Awards — shown here so the main row stays clean */}
+                    {awards.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap py-2.5 border-b border-black/10">
+                        {awards.map((a, i) => (
+                          <AwardBadge key={`${a.guesserId}-${a.awardType}-${i}`} awardType={a.awardType} />
+                        ))}
+                      </div>
+                    )}
                     <div className="divide-y divide-black/10">
                       {sortedRunners.map((runner) => {
                         const pred = predictions.find(
