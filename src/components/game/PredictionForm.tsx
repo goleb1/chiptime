@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import type { Game, Runner } from "@/lib/types";
 import { submitPredictions } from "@/lib/actions/game";
-import { getDefaultTimeForDistance, secondsToTimeString } from "@/lib/utils";
+import { getDefaultTimeForDistance, secondsToTimeString, findBestPr } from "@/lib/utils";
 import { MAX_DNF_BADGES_PER_GUESSER, SUPPORTED_DISTANCES } from "@/lib/constants";
 import TimeInput from "./TimeInput";
 import GameHeader from "./GameHeader";
@@ -80,7 +80,9 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
     return sortedDistances.map((dist) => ({ distance: dist, runners: groups[dist] }));
   }, [runners]);
 
-  const deadlinePassed = new Date() >= new Date(game.predictionDeadline);
+  const deadlinePassed = game.predictionDeadline
+    ? new Date() >= new Date(game.predictionDeadline)
+    : false;
 
   const canSubmit =
     guesserName.trim().length > 0 &&
@@ -159,12 +161,33 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
               key={runner.id}
               className="rounded-lg border border-black/15 p-4 space-y-3 bg-white/40"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-medium text-black">
-                      {runner.name}
-                    </p>
+              <div className="flex items-start gap-3">
+                {runner.athlete && (
+                  runner.athlete.photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={runner.athlete.photoUrl}
+                      alt={runner.name}
+                      className="h-10 w-10 rounded-full object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="h-10 w-10 rounded-full bg-black/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-sm font-medium text-black/50">
+                        {runner.name[0]?.toUpperCase()}
+                      </span>
+                    </div>
+                  )
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-black">{runner.name}</p>
+                    {(runner.athlete?.gender || runner.athlete?.birthYear) && (
+                      <span className="text-xs font-mono text-black/50">
+                        {runner.athlete.birthYear
+                          ? `${new Date().getFullYear() - runner.athlete.birthYear}${runner.athlete.gender ?? ""}`
+                          : runner.athlete.gender}
+                      </span>
+                    )}
                     {runner.athlete?.stravaUrl && (
                       <a
                         href={runner.athlete.stravaUrl}
@@ -178,13 +201,19 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
                     )}
                   </div>
                   {runner.notes && (
-                    <p className="text-xs text-black/50">{runner.notes}</p>
+                    <p className="text-xs text-black/50 mt-0.5">{runner.notes}</p>
                   )}
-                  {runner.athlete?.prs?.[runner.distance] && (
-                    <p className="text-xs text-track-red font-medium">
-                      PR: {secondsToTimeString(runner.athlete.prs[runner.distance])}
-                    </p>
-                  )}
+                  {runner.athlete && (() => {
+                    const best = findBestPr(runner.distance, runner.athlete.prs);
+                    if (!best) return null;
+                    return (
+                      <p className="text-xs text-track-red font-medium mt-0.5">
+                        {best.isExact
+                          ? `PR: ${secondsToTimeString(best.seconds)}`
+                          : `PR (${best.distance}): ${secondsToTimeString(best.seconds)}`}
+                      </p>
+                    );
+                  })()}
                 </div>
               </div>
 

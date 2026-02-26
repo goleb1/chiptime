@@ -87,7 +87,7 @@ export default async function GamePage({
   if (game.status === "predictions_open") {
     const { data: runnerRows } = await db
       .from("runners")
-      .select("*")
+      .select("*, athletes(*)")
       .eq("game_id", game.id)
       .order("sort_order", { ascending: true });
 

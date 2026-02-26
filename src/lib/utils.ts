@@ -57,3 +57,36 @@ export function getDefaultTimeForDistance(distance: string): number {
   const entry = SUPPORTED_DISTANCES.find((d) => d.name === distance);
   return entry?.defaultTimeSeconds ?? 0;
 }
+
+/**
+ * Find the best available PR for a given runner distance.
+ * Tries an exact distance match first; if none, returns the PR whose
+ * distance has the closest default time to the runner's distance.
+ * Returns null if the athlete has no PRs at all.
+ */
+export function findBestPr(
+  runnerDistance: string,
+  athletePrs: Record<string, number>
+): { distance: string; seconds: number; isExact: boolean } | null {
+  const prEntries = Object.entries(athletePrs).filter(([, s]) => s > 0);
+  if (prEntries.length === 0) return null;
+
+  if (athletePrs[runnerDistance]) {
+    return { distance: runnerDistance, seconds: athletePrs[runnerDistance], isExact: true };
+  }
+
+  const runnerDefault = getDefaultTimeForDistance(runnerDistance);
+  let closest: { distance: string; seconds: number } | null = null;
+  let minDiff = Infinity;
+
+  for (const [dist, secs] of prEntries) {
+    const prDefault = getDefaultTimeForDistance(dist);
+    const diff = Math.abs(prDefault - runnerDefault);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closest = { distance: dist, seconds: secs };
+    }
+  }
+
+  return closest ? { ...closest, isExact: false } : null;
+}
