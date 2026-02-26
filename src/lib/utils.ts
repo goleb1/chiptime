@@ -117,12 +117,19 @@ function getOrdinalSuffix(n: number): string {
 
 /**
  * Format an ISO datetime string to a 12-hour time: "7:00 AM"
+ *
+ * Parses directly from the string rather than using `new Date()` to avoid
+ * timezone conversion. The datetime-local input submits a wall-clock time
+ * (e.g. "2026-05-03T09:00") which Supabase stores as UTC. Converting via
+ * the browser's local timezone would shift the displayed time incorrectly.
  */
 export function formatRaceTime(isoStr: string): string {
-  const date = new Date(isoStr);
-  return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+  const timePart = isoStr.split("T")[1] ?? "";
+  const [hourStr, minuteStr] = timePart.split(":");
+  const hour = parseInt(hourStr, 10);
+  const minute = parseInt(minuteStr ?? "0", 10);
+  if (isNaN(hour)) return "";
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minute.toString().padStart(2, "0")} ${ampm}`;
 }

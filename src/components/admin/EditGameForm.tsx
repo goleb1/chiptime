@@ -53,6 +53,14 @@ export default function EditGameForm({ game, adminSecret }: EditGameFormProps) {
       />
 
       <Input
+        id="location"
+        name="location"
+        label="Location (optional)"
+        placeholder="e.g. Pittsburgh, PA"
+        defaultValue={game.location ?? ""}
+      />
+
+      <Input
         id="raceStartTime"
         name="raceStartTime"
         label="Race Start Time"
