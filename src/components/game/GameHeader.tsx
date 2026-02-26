@@ -8,7 +8,7 @@ interface GameHeaderProps {
 }
 
 function formatCountdown(ms: number): string {
-  if (ms <= 0) return "Deadline passed";
+  if (ms <= 0) return "Race has started";
 
   const totalSeconds = Math.floor(ms / 1000);
   const days = Math.floor(totalSeconds / 86400);
@@ -41,9 +41,21 @@ export default function GameHeader({ game }: GameHeaderProps) {
 
   return (
     <div className="space-y-2">
-      <h1 className="text-2xl font-bold font-serif text-black">
-        {game.name}
-      </h1>
+      <div className="flex items-center gap-3 flex-wrap">
+        <h1 className="text-2xl font-bold font-serif text-black">
+          {game.name}
+        </h1>
+        {game.raceWebsiteUrl && (
+          <a
+            href={game.raceWebsiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium text-track-red hover:underline"
+          >
+            Race website →
+          </a>
+        )}
+      </div>
       <p className="text-sm text-black/50">
         {game.raceDate} &middot; {game.distances.join(", ")}
       </p>
@@ -53,8 +65,8 @@ export default function GameHeader({ game }: GameHeaderProps) {
         }`}
       >
         {deadlinePassed
-          ? "Prediction deadline has passed"
-          : `Time remaining: ${formatCountdown(remaining)}`}
+          ? "Predictions closed"
+          : `Race starts in: ${formatCountdown(remaining)}`}
       </p>
     </div>
   );

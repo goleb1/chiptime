@@ -42,11 +42,11 @@ export default function CreateGameForm({ adminSecret }: { adminSecret: string })
       />
 
       <Input
-        id="predictionDeadline"
-        name="predictionDeadline"
-        label="Prediction Deadline"
-        type="datetime-local"
-        required
+        id="raceWebsiteUrl"
+        name="raceWebsiteUrl"
+        label="Race Website (optional)"
+        type="url"
+        placeholder="https://example.com/race"
       />
 
       <fieldset>

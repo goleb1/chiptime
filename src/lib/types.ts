@@ -78,10 +78,11 @@ export interface Game {
   slug: string;
   name: string;
   raceDate: string; // ISO date string (YYYY-MM-DD)
-  raceStartTime: string; // ISO timestamptz
+  raceStartTime: string; // ISO timestamptz; also serves as the prediction deadline
   distances: string[];
   officialResultsUrl: string | null;
-  predictionDeadline: string; // ISO timestamptz
+  raceWebsiteUrl: string | null;
+  predictionDeadline: string; // ISO timestamptz — set equal to raceStartTime on creation
   status: GameStatus;
   showOnHomepage: boolean;
   createdAt: string;

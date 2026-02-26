@@ -26,9 +26,6 @@ The current tiers (0%, 0.5%, 1%, 2%, 3%, 5%, 8%, 12%) are a starting point. Afte
 
 ## Awards & Recognition
 
-### Over/Under Awards
-Awards for the guesser who most consistently guesses faster or slower than actual. "The Optimist" (always guesses fast) and "The Realist" (always guesses slow). Cut from v1 to keep the award set tight at 5.
-
 ### Season-Long Leaderboard
 Aggregate scores across multiple race weekends for an annual champion. Requires persistent guesser identity (accounts or consistent name matching). Would be a major engagement driver for repeat play.
 
@@ -83,9 +80,6 @@ Upload a CSV of runners (name, distance) for larger games. Useful if expanding b
 ### Cropping in photo add
 Ability to crop and see circular overlay preview when uploading an athlete image.
 
-### Result Entry from Mobile
-Optimized admin interface for entering results on a phone at the finish line. Quick-entry mode: tap runner name, enter time, save, next.
-
 ### Game Cloning
 Duplicate a past game's setup (runners, distances) for a new race weekend. Saves setup time for recurring events (e.g., same club does Pittsburgh Marathon every year).
 
@@ -98,9 +92,6 @@ Allow other running clubs or friend groups to create their own ChipTime games in
 
 ### Embeddable Leaderboard Widget
 An embeddable iframe or web component that running clubs could add to their own websites to display the live leaderboard.
-
-### Real-Time WebSocket Leaderboard
-Replace 30-second polling with true real-time updates via Supabase Realtime or WebSockets. Leaderboard updates instantly as admin enters each result. Premium feel.
 
 ### Native Mobile App
 If the web app gains traction, a React Native or PWA version for native mobile experience. Push notifications, offline draft saving, better drum picker performance.

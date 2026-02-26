@@ -23,6 +23,7 @@ export function mapGameRow(row: any): Game {
     raceStartTime: row.race_start_time,
     distances: row.distances,
     officialResultsUrl: row.official_results_url,
+    raceWebsiteUrl: row.race_website_url ?? null,
     predictionDeadline: row.prediction_deadline,
     status: row.status,
     showOnHomepage: row.show_on_homepage,
