@@ -25,6 +25,7 @@ export function mapGameRow(row: any): Game {
     officialResultsUrl: row.official_results_url,
     predictionDeadline: row.prediction_deadline,
     status: row.status,
+    showOnHomepage: row.show_on_homepage,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

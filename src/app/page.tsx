@@ -1,9 +1,39 @@
 import Image from "next/image";
+import { createAdminClient } from "@/lib/supabase";
+import { mapGameRow } from "@/lib/db-utils";
+import HomepageGameBrowser from "@/components/HomepageGameBrowser";
+import type { Game } from "@/lib/types";
 
-export default function Home() {
+export const revalidate = 60; // ISR: revalidate at most every 60 seconds
+
+async function getHomeGames(): Promise<{ upcoming: Game[]; active: Game[]; past: Game[] }> {
+  const db = createAdminClient();
+  const { data: rows } = await db
+    .from("games")
+    .select("*")
+    .eq("show_on_homepage", true)
+    .order("race_date", { ascending: true });
+
+  const games = (rows || []).map(mapGameRow);
+
+  const upcoming = games.filter(
+    (g) => g.status === "setup" || g.status === "predictions_open"
+  );
+  const active = games.filter(
+    (g) => g.status === "predictions_locked" || g.status === "results_entering"
+  );
+  const past = games.filter((g) => g.status === "finalized");
+
+  return { upcoming, active, past };
+}
+
+export default async function Home() {
+  const { upcoming, active, past } = await getHomeGames();
+  const hasAnyGames = upcoming.length + active.length + past.length > 0;
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-cream px-6">
-      <main className="flex max-w-lg flex-col items-center gap-12 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-cream px-6 py-12">
+      <main className="flex w-full max-w-lg flex-col items-center gap-12 text-center">
         {/* Logo / Hero */}
         <div className="flex flex-col items-center gap-5">
           <Image
@@ -51,6 +81,16 @@ export default function Home() {
             </p>
           </div>
         </div>
+
+        {/* Game browser (only shown when there are home-visible games) */}
+        {hasAnyGames && (
+          <div className="w-full text-left">
+            <h2 className="mb-4 font-serif text-lg font-semibold text-black">
+              Games
+            </h2>
+            <HomepageGameBrowser upcoming={upcoming} active={active} past={past} />
+          </div>
+        )}
 
         <p className="text-xs text-black/40">
           Ask the game organizer for a link to join.

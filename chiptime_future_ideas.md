@@ -67,14 +67,8 @@ Notify guessers when: prediction deadline is approaching, results are being ente
 ### Strava Integration
 Pull runner data from Strava API to display on the prediction form — recent activities, training volume, race history. Helps casual guessers who don't follow everyone's training. Could show: last 4 weeks of mileage, most recent race result, weekly training pace. **Privacy consideration:** runners would need to opt in to sharing their Strava data.
 
-### Runner Profile with Strava Link
-Simpler version of above — just display a link to each runner's Strava profile so guessers can click through and do their own research. No API needed, just a URL field on the runner record.
-
 ### Race Results API Integration
 Auto-populate actual finish times from official race results feeds instead of manual admin entry. Would need to handle: different result formats, timing delays, chip vs. gun time selection. Research: RunSignUp API, Athlinks API, MTEC Results.
-
-### Runner Self-Registration
-Instead of admin manually adding runners, share a registration link. Runners add themselves and declare their distance. Reduces admin workload for larger games.
 
 ---
 
@@ -89,9 +83,6 @@ Upload a CSV of runners (name, distance) for larger games. Useful if expanding b
 ### Result Entry from Mobile
 Optimized admin interface for entering results on a phone at the finish line. Quick-entry mode: tap runner name, enter time, save, next.
 
-### Game Templates
-Save a game's runner list as a template for the next race weekend. "Copy runners from Pittsburgh Marathon 2026" → pre-populates the runner list for the next game.
-
 ### Game Cloning
 Duplicate a past game's setup (runners, distances) for a new race weekend. Saves setup time for recurring events (e.g., same club does Pittsburgh Marathon every year).
 
@@ -101,9 +92,6 @@ Duplicate a past game's setup (runners, distances) for a new race weekend. Saves
 
 ### Multi-Group / Multi-Club Support
 Allow other running clubs or friend groups to create their own ChipTime games independently. Requires: user accounts, game ownership, potentially separate namespaces. This is the "platform" version of ChipTime.
-
-### Public Game Discovery
-If multi-group support is built, allow games to be listed publicly so anyone can find and join prediction games for major races. "Join the ChipTime prediction game for the Boston Marathon 2027."
 
 ### Embeddable Leaderboard Widget
 An embeddable iframe or web component that running clubs could add to their own websites to display the live leaderboard.
@@ -142,9 +130,6 @@ Unit tests for scoring engine, integration tests for API routes, end-to-end test
 
 ### Analytics
 Track: number of games created, guessers per game, prediction completion rates, leaderboard views. Helps understand usage patterns for prioritizing features.
-
-### Accessibility Audit
-Ensure the app meets WCAG 2.1 AA standards. Particular attention to: drum picker keyboard navigation, color contrast on leaderboard, screen reader support for expandable rows.
 
 ---
 

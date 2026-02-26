@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { Game, Runner } from "@/lib/types";
 import { ADMIN_POLL_INTERVAL_MS } from "@/lib/constants";
 import GameStatusBar from "./GameStatusBar";
+import GameVisibilityToggle from "./GameVisibilityToggle";
 import RunnerForm from "./RunnerForm";
 import RunnerList from "./RunnerList";
 import ResultsEntry from "./ResultsEntry";
@@ -69,12 +70,15 @@ export default function AdminGameView({
         <p className="text-sm text-black/50 mt-1">
           {game.raceDate} &middot; {game.distances.join(", ")}
         </p>
-        <p className="text-sm text-black/40 mt-1">
-          Share link:{" "}
-          <code className="bg-black/10 px-1 py-0.5 rounded text-xs">
-            {shareUrl}
-          </code>
-        </p>
+        <div className="flex flex-wrap items-center gap-3 mt-1">
+          <p className="text-sm text-black/40">
+            Share link:{" "}
+            <code className="bg-black/10 px-1 py-0.5 rounded text-xs">
+              {shareUrl}
+            </code>
+          </p>
+          <GameVisibilityToggle gameId={game.id} showOnHomepage={game.showOnHomepage} />
+        </div>
         {showGuesserCount && (
           <p className="text-sm text-track-red mt-1">
             {guesserCount} {guesserCount === 1 ? "guesser" : "guessers"} submitted

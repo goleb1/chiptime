@@ -70,6 +70,32 @@ export async function createGame(formData: FormData): Promise<ActionResult<Game>
 }
 
 // ============================================================
+// toggleGameVisibility
+// ============================================================
+
+export async function toggleGameVisibility(
+  gameId: string,
+  showOnHomepage: boolean
+): Promise<ActionResult> {
+  const db = createAdminClient();
+
+  const { error } = await db
+    .from("games")
+    .update({ show_on_homepage: showOnHomepage })
+    .eq("id", gameId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  const adminSecret = process.env.ADMIN_SECRET;
+  revalidatePath(`/admin/${adminSecret}`);
+  revalidatePath("/");
+
+  return { success: true, data: undefined };
+}
+
+// ============================================================
 // addRunner
 // ============================================================
 

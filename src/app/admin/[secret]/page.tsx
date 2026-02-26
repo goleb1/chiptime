@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase";
 import { mapGameRow } from "@/lib/db-utils";
 import StatusBadge from "@/components/ui/StatusBadge";
+import GameVisibilityToggle from "@/components/admin/GameVisibilityToggle";
 import type { Game } from "@/lib/types";
 
 export default async function AdminDashboard({
@@ -68,22 +69,25 @@ export default async function AdminDashboard({
 
 function GameCard({ game, secret }: { game: Game; secret: string }) {
   return (
-    <Link
-      href={`/admin/${secret}/game/${game.slug}`}
-      className="block rounded-lg border border-black/10 bg-white/50 p-4 hover:border-track-red/40 hover:bg-white/70 transition-colors"
-    >
-      <div className="flex items-center justify-between">
-        <div>
+    <div className="flex items-stretch gap-2 rounded-lg border border-black/10 bg-white/50 transition-colors hover:border-track-red/40 hover:bg-white/70">
+      <Link
+        href={`/admin/${secret}/game/${game.slug}`}
+        className="flex min-w-0 flex-1 items-center justify-between gap-4 p-4"
+      >
+        <div className="min-w-0">
           <h3 className="font-medium text-black">{game.name}</h3>
-          <p className="text-sm text-black/50 mt-1">
+          <p className="mt-1 text-sm text-black/50">
             {game.raceDate} &middot; {game.distances.join(", ")}
           </p>
-          <p className="text-xs text-black/40 mt-1 font-mono">
+          <p className="mt-1 font-mono text-xs text-black/40">
             /game/{game.slug}
           </p>
         </div>
         <StatusBadge status={game.status} />
+      </Link>
+      <div className="flex items-center border-l border-black/10 px-3">
+        <GameVisibilityToggle gameId={game.id} showOnHomepage={game.showOnHomepage} />
       </div>
-    </Link>
+    </div>
   );
 }

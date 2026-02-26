@@ -79,6 +79,7 @@ export interface Game {
   officialResultsUrl: string | null;
   predictionDeadline: string; // ISO timestamptz
   status: GameStatus;
+  showOnHomepage: boolean;
   createdAt: string;
   updatedAt: string;
 }
