@@ -9,7 +9,7 @@ import type {
   Runner,
   Award,
 } from "@/lib/types";
-import { LEADERBOARD_REALTIME_FALLBACK_MS, SUPPORTED_DISTANCES } from "@/lib/constants";
+import { LEADERBOARD_REALTIME_FALLBACK_MS, SUPPORTED_DISTANCES, AWARD_DEFINITIONS } from "@/lib/constants";
 import { supabase } from "@/lib/supabase";
 import { formatErrorPercentage } from "@/lib/utils";
 import AwardBadge from "./AwardBadge";
@@ -137,12 +137,12 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
       {data.guessers.length === 0 ? (
         <p className="text-black/50 text-sm">No predictions submitted yet.</p>
       ) : (
+        <>
         <div className="border border-black/10 rounded-lg overflow-hidden">
-          {/* Header */}
-          <div className="grid grid-cols-[2rem_1fr_auto_3.5rem_2rem] gap-2 px-4 py-2 bg-black/5 text-xs font-medium text-black/50 uppercase tracking-wide">
-            <span>#</span>
+          {/* Header — 4 columns: rank | name | score | chevron */}
+          <div className="grid grid-cols-[2rem_1fr_4rem_1.5rem] gap-2 px-4 py-2 bg-black/5 text-xs font-medium text-black/50 uppercase tracking-wide">
+            <span className="text-center">#</span>
             <span>Name</span>
-            <span />
             <span className="text-right">Score</span>
             <span />
           </div>
@@ -158,26 +158,34 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                 key={guesser.id}
                 className="border-t border-black/10"
               >
-                {/* Main row */}
+                {/* Main row — same 4-column grid as header */}
                 <button
                   onClick={() => toggleExpanded(guesser.id)}
-                  className="w-full grid grid-cols-[2rem_1fr_auto_3.5rem_2rem] gap-2 px-4 py-3 text-left hover:bg-black/5 transition-colors"
+                  className="w-full grid grid-cols-[2rem_1fr_4rem_1.5rem] gap-2 px-4 py-3 text-left hover:bg-black/5 transition-colors items-start"
                 >
-                  <span className={`font-medium leading-none ${guesser.rank != null && guesser.rank <= 3 ? "text-base" : "text-sm text-black/40"}`}>
-                    {rankDisplay(guesser.rank)}
+                  {/* Rank — centered so medals + numbers sit under # */}
+                  <span className="flex items-center justify-center pt-0.5">
+                    <span className={`font-medium leading-none ${guesser.rank != null && guesser.rank <= 3 ? "text-base" : "text-xs text-black/40"}`}>
+                      {rankDisplay(guesser.rank)}
+                    </span>
                   </span>
-                  <span className="text-sm font-medium text-black truncate min-w-0">
-                    {guesser.name}
-                  </span>
-                  <span className="flex items-center gap-1 shrink-0">
-                    {awards.map((a, i) => (
-                      <AwardBadge key={`${a.guesserId}-${a.awardType}-${i}`} awardType={a.awardType} />
-                    ))}
-                  </span>
-                  <span className="text-sm text-right text-black/70 font-mono">
+                  {/* Name + badges stacked — name never gets squeezed */}
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-black truncate">
+                      {guesser.name}
+                    </p>
+                    {awards.length > 0 && (
+                      <div className="flex items-center gap-1 flex-wrap mt-1">
+                        {awards.map((a, i) => (
+                          <AwardBadge key={`${a.guesserId}-${a.awardType}-${i}`} awardType={a.awardType} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-sm text-right text-black/70 font-mono pt-0.5">
                     {guesser.totalScore ?? "—"}
                   </span>
-                  <span className="text-right text-xs text-black/40">
+                  <span className="text-right text-xs text-black/40 pt-1">
                     {isExpanded ? "▲" : "▼"}
                   </span>
                 </button>
@@ -279,6 +287,27 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
             );
           })}
         </div>
+
+        {/* Awards key */}
+        <details className="mt-5 group">
+          <summary className="cursor-pointer list-none flex items-center gap-1 text-xs font-medium text-black/40 uppercase tracking-wider hover:text-black/60 transition-colors select-none">
+            <span className="inline-block transition-transform group-open:rotate-90">›</span>
+            Awards key
+          </summary>
+          <div className="mt-2.5 space-y-2">
+            {AWARD_DEFINITIONS.map((def) => (
+              <div key={def.type} className="flex items-start gap-2.5">
+                <span className="text-base leading-none shrink-0 mt-px">{def.icon}</span>
+                <p className="text-xs text-black/50 leading-relaxed">
+                  <span className="font-semibold text-black/70">{def.label}</span>
+                  {" — "}
+                  {def.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </details>
+        </>
       )}
     </div>
   );
