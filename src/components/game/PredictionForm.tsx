@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import type { Game, Runner } from "@/lib/types";
 import { submitPredictions } from "@/lib/actions/game";
 import { getDefaultTimeForDistance, secondsToTimeString, findBestPr } from "@/lib/utils";
@@ -138,7 +140,10 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
   // ─── Sticky header (shared between submitted + main views) ───
   const stickyHeader = (
     <header className="fixed top-0 inset-x-0 h-11 bg-track-red z-40 flex items-center justify-between px-4">
-      <span className="font-serif italic text-cream font-bold text-lg leading-none">Chiptime</span>
+      <Link href="/" className="flex items-center gap-2">
+        <Image src="/chiptime.svg" alt="" width={24} height={28} className="h-7 w-auto" />
+        <span className="font-serif italic text-cream font-bold text-lg leading-none">Chiptime</span>
+      </Link>
       <span className="font-mono text-white/80 text-xs">
         {deadlinePassed ? "Closed" : formatCompactCountdown(remaining)}
       </span>
