@@ -11,7 +11,7 @@ interface TimeInputProps {
   disabled?: boolean;
 }
 
-const ITEM_HEIGHT = 36;
+const ITEM_HEIGHT = 52;
 const VISIBLE_ITEMS = 3;
 const PADDING_ITEMS = Math.floor(VISIBLE_ITEMS / 2);
 
@@ -96,7 +96,7 @@ function ScrollColumn({
 
   return (
     <div className="flex flex-col items-center">
-      <span className="text-[10px] text-black/40 uppercase tracking-wide mb-1">
+      <span className="text-xs text-black/40 uppercase tracking-wide mb-1">
         {label}
       </span>
       <div className="relative" style={{ height: ITEM_HEIGHT * VISIBLE_ITEMS }}>
@@ -125,10 +125,10 @@ function ScrollColumn({
               <div
                 key={v}
                 onClick={() => handleItemClick(v)}
-                className={`flex items-center justify-center text-sm font-mono cursor-pointer select-none transition-colors ${
+                className={`flex items-center justify-center text-2xl font-mono cursor-pointer select-none transition-colors ${
                   isSelected
                     ? "text-track-red font-semibold"
-                    : "text-black/30"
+                    : "text-black/25"
                 } ${disabled ? "opacity-50 cursor-default" : ""}`}
                 style={{
                   height: ITEM_HEIGHT,
@@ -183,7 +183,7 @@ export default function TimeInput({
           label="hr"
         />
       </div>
-      <span className="text-black/30 font-medium text-lg pb-8">:</span>
+      <span className="text-black/30 font-medium text-xl pb-[52px]">:</span>
       <div className="flex-1 min-w-0">
         <ScrollColumn
           values={MINUTES}
@@ -194,7 +194,7 @@ export default function TimeInput({
           padDisplay
         />
       </div>
-      <span className="text-black/30 font-medium text-lg pb-8">:</span>
+      <span className="text-black/30 font-medium text-xl pb-[52px]">:</span>
       <div className="flex-1 min-w-0">
         <ScrollColumn
           values={SECONDS}

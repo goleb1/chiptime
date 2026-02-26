@@ -138,7 +138,7 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
   // ─── Sticky header (shared between submitted + main views) ───
   const stickyHeader = (
     <header className="fixed top-0 inset-x-0 h-11 bg-track-red z-40 flex items-center justify-between px-4">
-      <span className="font-mono text-white font-bold text-sm tracking-wide">Chiptime</span>
+      <span className="font-serif italic text-cream font-bold text-lg leading-none">Chiptime</span>
       <span className="font-mono text-white/80 text-xs">
         {deadlinePassed ? "Closed" : formatCompactCountdown(remaining)}
       </span>
@@ -165,6 +165,7 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
 
       {/* ─── Scrollable content (offset for fixed header) ─── */}
       <div className="pt-11">
+      <div className="max-w-lg mx-auto">
 
         {/* Game info block */}
         <div className="px-4 py-3 border-b border-black/10 space-y-0.5">
@@ -331,17 +332,20 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
         </p>
 
       </div>
+      </div>
 
       {/* ─── Fixed bottom submit bar ─── */}
-      <div className="fixed bottom-0 inset-x-0 bg-cream border-t border-black/15 px-4 py-3 z-30">
-        <Button
-          onClick={handleSubmit}
-          disabled={!canSubmit}
-          loading={submitting}
-          className="w-full"
-        >
-          Submit Predictions
-        </Button>
+      <div className="fixed bottom-0 inset-x-0 bg-cream border-t border-black/15 py-3 z-30">
+        <div className="max-w-lg mx-auto px-4">
+          <Button
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            loading={submitting}
+            className="w-full"
+          >
+            Submit Predictions
+          </Button>
+        </div>
       </div>
     </div>
   );
