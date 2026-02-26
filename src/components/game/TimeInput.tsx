@@ -99,7 +99,7 @@ function ScrollColumn({
       <span className="text-xs text-black/40 uppercase tracking-wide mb-1">
         {label}
       </span>
-      <div className="relative" style={{ height: ITEM_HEIGHT * VISIBLE_ITEMS }}>
+      <div className="relative w-full" style={{ height: ITEM_HEIGHT * VISIBLE_ITEMS }}>
         {/* Highlight band */}
         <div
           className="absolute inset-x-0 pointer-events-none bg-track-red/10 border-y border-track-red/30 z-10"
