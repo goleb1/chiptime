@@ -184,17 +184,8 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
 
                 {/* Expanded detail */}
                 {isExpanded && (
-                  <div className="px-4 pb-3 bg-black/5">
-                    {/* Column headers — desktop only */}
-                    <div className="hidden sm:grid sm:grid-cols-[1fr_5rem_5rem_4rem_3.5rem] sm:gap-2 text-[10px] uppercase tracking-wider pb-1.5 mb-0.5 border-b border-black/10">
-                      <span className="text-black/30">Runner</span>
-                      <span className="text-right text-[#b07828]">Guess</span>
-                      <span className="text-right text-[#22a85a]">Result</span>
-                      <span className="text-right text-black/30">Error</span>
-                      <span className="text-right text-black/30">Pts</span>
-                    </div>
-
-                    <div className="space-y-1 mt-1">
+                  <div className="px-4 pb-1 bg-black/5">
+                    <div className="divide-y divide-black/10">
                       {sortedRunners.map((runner) => {
                         const pred = predictions.find(
                           (p) => p.runnerId === runner.id
@@ -206,56 +197,78 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                         const isDnf = runner.status === "dnf";
 
                         return (
-                          <div
-                            key={runner.id}
-                            className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs items-center py-1.5 border-b border-black/10 last:border-b-0 sm:grid-cols-[1fr_5rem_5rem_4rem_3.5rem] sm:gap-2 sm:py-1"
-                          >
-                            {/* Runner name + distance */}
-                            <span className="text-black/70 truncate col-span-2 sm:col-span-1">
-                              {runner.name}
-                              <span className="text-black/40 ml-1">
+                          <div key={runner.id} className="py-3">
+                            {/* Runner name + tags */}
+                            <div className="flex items-center gap-1.5 mb-2">
+                              <span className="text-xs font-semibold text-black/80 truncate">
+                                {runner.name}
+                              </span>
+                              <span className="text-[10px] text-black/35 shrink-0">
                                 ({runner.distance})
                               </span>
                               {pred.dnfBadge && (
-                                <span
-                                  className="ml-1 text-track-red"
-                                  title="DNF Call"
-                                >
-                                  DNF
+                                <span className="text-[10px] font-semibold text-track-red shrink-0">
+                                  DNF Call
                                 </span>
                               )}
-                            </span>
+                            </div>
 
-                            {/* Predicted time */}
-                            <span className="sm:text-right">
-                              <span className="text-[10px] text-[#b07828] sm:hidden">Guess </span>
-                              <DigitalTime seconds={pred.predictedTimeSeconds} variant="predicted" />
-                            </span>
+                            {/* Guess → Result + Points */}
+                            <div className="flex items-end gap-2">
+                              {/* Guess */}
+                              <div className="shrink-0">
+                                <p className="text-[9px] uppercase tracking-wider text-gold mb-1">
+                                  Guess
+                                </p>
+                                <DigitalTime
+                                  seconds={pred.predictedTimeSeconds}
+                                  variant="predicted"
+                                />
+                              </div>
 
-                            {/* Actual time */}
-                            <span className="text-right sm:text-right">
-                              <span className="text-[10px] text-[#22a85a] sm:hidden">Result </span>
-                              {!hasResult ? (
-                                <DigitalTime seconds={null} variant="actual" />
-                              ) : isDnf ? (
-                                <span className="text-track-red font-medium">DNF</span>
-                              ) : (
-                                <DigitalTime seconds={runner.actualTimeSeconds!} variant="actual" />
-                              )}
-                            </span>
+                              <span className="text-black/20 text-xs pb-1 shrink-0">→</span>
 
-                            {/* Error % */}
-                            <span className="text-black/50 sm:text-right">
-                              <span className="text-black/40 sm:hidden">Err: </span>
-                              {pred.errorPercentage != null
-                                ? formatErrorPercentage(pred.errorPercentage)
-                                : "—"}
-                            </span>
+                              {/* Result */}
+                              <div className="shrink-0">
+                                <p className="text-[9px] uppercase tracking-wider text-[#22a85a] mb-1">
+                                  Result
+                                </p>
+                                {!hasResult ? (
+                                  <DigitalTime seconds={null} variant="actual" />
+                                ) : isDnf ? (
+                                  <div className="inline-flex items-center h-[26px]">
+                                    <span className="text-sm font-bold text-track-red font-mono">
+                                      DNF
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <DigitalTime
+                                    seconds={runner.actualTimeSeconds!}
+                                    variant="actual"
+                                  />
+                                )}
+                              </div>
 
-                            {/* Score */}
-                            <span className="text-right font-mono font-medium text-black/70">
-                              {pred.score != null ? pred.score : "—"}
-                            </span>
+                              {/* Spacer */}
+                              <div className="flex-1 min-w-0" />
+
+                              {/* Points */}
+                              <div className="text-right shrink-0">
+                                <p className="text-[9px] uppercase tracking-wider text-black/30 mb-1">
+                                  Pts
+                                </p>
+                                <span className="text-base font-mono font-semibold text-black/80">
+                                  {pred.score != null ? pred.score : "—"}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Error % — shown only when scored */}
+                            {pred.errorPercentage != null && (
+                              <p className="text-[10px] text-black/40 mt-1.5">
+                                {formatErrorPercentage(pred.errorPercentage)} off target
+                              </p>
+                            )}
                           </div>
                         );
                       })}
