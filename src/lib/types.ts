@@ -19,7 +19,9 @@ export type AwardType =
   | "trash_can"
   | "robot"
   | "chaos_agent"
-  | "oracle";
+  | "oracle"
+  | "optimist"
+  | "realist";
 
 export type ScoringTier =
   | "Dead on"

@@ -123,7 +123,7 @@ export async function GET(
   }
 
   // Compute live awards
-  const liveAwards = computeAwards(livePredictions, liveGuessers, game.id);
+  const liveAwards = computeAwards(livePredictions, liveGuessers, game.id, runners);
 
   return NextResponse.json({
     game,

@@ -418,7 +418,7 @@ export async function finalizeGame(gameId: string): Promise<ActionResult> {
   }
 
   // Compute and insert awards
-  const awards = computeAwards(mappedPredictions, mappedGuessers, gameId);
+  const awards = computeAwards(mappedPredictions, mappedGuessers, gameId, mappedRunners);
   if (awards.length > 0) {
     // Delete existing awards for this game first
     await db.from("awards").delete().eq("game_id", gameId);

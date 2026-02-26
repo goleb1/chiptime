@@ -9,7 +9,8 @@ import type {
   Runner,
   Award,
 } from "@/lib/types";
-import { LEADERBOARD_POLL_INTERVAL_MS, SUPPORTED_DISTANCES } from "@/lib/constants";
+import { LEADERBOARD_REALTIME_FALLBACK_MS, SUPPORTED_DISTANCES } from "@/lib/constants";
+import { supabase } from "@/lib/supabase";
 import { formatErrorPercentage } from "@/lib/utils";
 import AwardBadge from "./AwardBadge";
 import DigitalTime from "@/components/ui/DigitalTime";
@@ -50,11 +51,30 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
   }, [fetchData]);
 
   useEffect(() => {
-    if (data.status !== "results_entering" && data.status !== "predictions_locked") return;
+    const isLive =
+      data.status === "results_entering" || data.status === "predictions_locked";
+    if (!isLive) return;
 
-    const interval = setInterval(fetchData, LEADERBOARD_POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
-  }, [data.status, fetchData]);
+    const gameId = data.game.id;
+
+    // Subscribe to runner changes — fires immediately when admin saves a result
+    const channel = supabase
+      .channel(`game-runners-${gameId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "runners", filter: `game_id=eq.${gameId}` },
+        () => { fetchData(); }
+      )
+      .subscribe();
+
+    // Fallback poll in case Realtime connection drops
+    const fallback = setInterval(fetchData, LEADERBOARD_REALTIME_FALLBACK_MS);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(fallback);
+    };
+  }, [data.status, data.game.id, fetchData]);
 
   const toggleExpanded = (guesserId: string) => {
     setExpandedIds((prev) => {
@@ -104,7 +124,7 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
         </h2>
         {isLive && (
           <span className="text-xs text-gold animate-pulse">
-            Live — updating every 30s
+            Live
           </span>
         )}
         {isFinalized && (

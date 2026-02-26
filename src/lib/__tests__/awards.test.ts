@@ -1,5 +1,5 @@
 import { computeAwards } from "../awards";
-import type { Guesser, Prediction } from "../types";
+import type { Guesser, Prediction, Runner } from "../types";
 
 // Helper to create a scored prediction
 function makePrediction(
@@ -218,5 +218,145 @@ describe("computeAwards", () => {
   it("returns no awards when there are no predictions", () => {
     const awards = computeAwards([], guessers, "game1");
     expect(awards).toHaveLength(0);
+  });
+});
+
+// Helper to create a finished runner with an actual time
+function makeRunner(
+  id: string,
+  actualTimeSeconds: number,
+  status: Runner["status"] = "finished"
+): Runner {
+  return {
+    id,
+    gameId: "game1",
+    name: `Runner ${id}`,
+    distance: "Full Marathon",
+    notes: null,
+    actualTimeSeconds,
+    status,
+    sortOrder: 0,
+    athleteId: null,
+    createdAt: "",
+  };
+}
+
+describe("computeAwards — Optimist & Realist", () => {
+  const guessers = [
+    makeGuesser("g1", "Alice"),
+    makeGuesser("g2", "Bob"),
+    makeGuesser("g3", "Carol"),
+  ];
+
+  // r1: actual 10000s, r2: actual 12000s
+  const runners = [
+    makeRunner("r1", 10000),
+    makeRunner("r2", 12000),
+  ];
+
+  it("awards Optimist to the guesser who consistently predicts faster times", () => {
+    const predictions = [
+      // g1: predicts under (faster) on both runners
+      makePrediction("p1", "g1", "r1", { predictedTimeSeconds: 9000, errorPercentage: 10.0, score: 10 }),
+      makePrediction("p2", "g1", "r2", { predictedTimeSeconds: 11000, errorPercentage: 8.3, score: 10 }),
+      // g2: predicts over (slower) on both runners
+      makePrediction("p3", "g2", "r1", { predictedTimeSeconds: 11000, errorPercentage: 10.0, score: 10 }),
+      makePrediction("p4", "g2", "r2", { predictedTimeSeconds: 13000, errorPercentage: 8.3, score: 10 }),
+    ];
+
+    const awards = computeAwards(predictions, guessers, "game1", runners);
+    const optimist = awards.find((a) => a.awardType === "optimist");
+    expect(optimist).toBeDefined();
+    expect(optimist!.guesserId).toBe("g1");
+    expect(optimist!.detail).toBe("Predicted faster 2/2 times");
+  });
+
+  it("awards Realist to the guesser who consistently predicts slower times", () => {
+    const predictions = [
+      makePrediction("p1", "g1", "r1", { predictedTimeSeconds: 9000, errorPercentage: 10.0, score: 10 }),
+      makePrediction("p2", "g1", "r2", { predictedTimeSeconds: 11000, errorPercentage: 8.3, score: 10 }),
+      makePrediction("p3", "g2", "r1", { predictedTimeSeconds: 11000, errorPercentage: 10.0, score: 10 }),
+      makePrediction("p4", "g2", "r2", { predictedTimeSeconds: 13000, errorPercentage: 8.3, score: 10 }),
+    ];
+
+    const awards = computeAwards(predictions, guessers, "game1", runners);
+    const realist = awards.find((a) => a.awardType === "realist");
+    expect(realist).toBeDefined();
+    expect(realist!.guesserId).toBe("g2");
+    expect(realist!.detail).toBe("Predicted slower 2/2 times");
+  });
+
+  it("does not award Optimist or Realist when a guesser has fewer than 2 qualified predictions", () => {
+    const oneRunner = [makeRunner("r1", 10000)];
+    const predictions = [
+      makePrediction("p1", "g1", "r1", { predictedTimeSeconds: 9000, errorPercentage: 10.0, score: 10 }),
+    ];
+
+    const awards = computeAwards(predictions, guessers, "game1", oneRunner);
+    expect(awards.find((a) => a.awardType === "optimist")).toBeUndefined();
+    expect(awards.find((a) => a.awardType === "realist")).toBeUndefined();
+  });
+
+  it("does not award Optimist when a guesser has equal under/over predictions (no majority)", () => {
+    const predictions = [
+      // g1: 1 under, 1 over → tied, no majority
+      makePrediction("p1", "g1", "r1", { predictedTimeSeconds: 9000, errorPercentage: 10.0, score: 10 }),
+      makePrediction("p2", "g1", "r2", { predictedTimeSeconds: 13000, errorPercentage: 8.3, score: 10 }),
+    ];
+
+    const awards = computeAwards(predictions, guessers, "game1", runners);
+    expect(awards.find((a) => a.awardType === "optimist")).toBeUndefined();
+    expect(awards.find((a) => a.awardType === "realist")).toBeUndefined();
+  });
+
+  it("uses total underDelta as tiebreak when two guessers have the same under-ratio", () => {
+    // 3 runners for a 2/3 ratio scenario
+    const threeRunners = [
+      makeRunner("r1", 10000),
+      makeRunner("r2", 12000),
+      makeRunner("r3", 8000),
+    ];
+
+    const predictions = [
+      // g1: under on r1 by 500s, under on r2 by 500s, over on r3
+      makePrediction("p1", "g1", "r1", { predictedTimeSeconds: 9500, errorPercentage: 5.0, score: 35 }),
+      makePrediction("p2", "g1", "r2", { predictedTimeSeconds: 11500, errorPercentage: 4.2, score: 35 }),
+      makePrediction("p3", "g1", "r3", { predictedTimeSeconds: 8500, errorPercentage: 6.3, score: 35 }),
+      // g2: under on r1 by 2000s, under on r2 by 2000s, over on r3
+      makePrediction("p4", "g2", "r1", { predictedTimeSeconds: 8000, errorPercentage: 20.0, score: 5 }),
+      makePrediction("p5", "g2", "r2", { predictedTimeSeconds: 10000, errorPercentage: 16.7, score: 5 }),
+      makePrediction("p6", "g2", "r3", { predictedTimeSeconds: 8500, errorPercentage: 6.3, score: 35 }),
+    ];
+
+    const awards = computeAwards(predictions, guessers, "game1", threeRunners);
+    const optimist = awards.find((a) => a.awardType === "optimist");
+    expect(optimist).toBeDefined();
+    // g2 wins tiebreak: both are 2/3 under, but g2's total underDelta (2000+2000=4000) > g1's (500+500=1000)
+    expect(optimist!.guesserId).toBe("g2");
+  });
+
+  it("excludes DNF/DNS predictions (errorPercentage=null) from over/under calculation", () => {
+    const predictions = [
+      // g1: 1 real under-prediction + 1 DNF prediction (should not count toward over/under)
+      makePrediction("p1", "g1", "r1", { predictedTimeSeconds: 9000, errorPercentage: 10.0, score: 10 }),
+      makePrediction("p2", "g1", "r2", { predictedTimeSeconds: 10000, dnfBadge: true, score: 50, errorPercentage: null }),
+    ];
+
+    const awards = computeAwards(predictions, guessers, "game1", runners);
+    // Only 1 qualified prediction for g1 (the DNF is excluded), so no Optimist/Realist
+    expect(awards.find((a) => a.awardType === "optimist")).toBeUndefined();
+    expect(awards.find((a) => a.awardType === "realist")).toBeUndefined();
+  });
+
+  it("does not award Optimist or Realist when no runners are passed", () => {
+    const predictions = [
+      makePrediction("p1", "g1", "r1", { predictedTimeSeconds: 9000, errorPercentage: 10.0, score: 10 }),
+      makePrediction("p2", "g1", "r2", { predictedTimeSeconds: 11000, errorPercentage: 8.3, score: 10 }),
+    ];
+
+    // No runners → default behavior (backward compat with existing callers)
+    const awards = computeAwards(predictions, guessers, "game1");
+    expect(awards.find((a) => a.awardType === "optimist")).toBeUndefined();
+    expect(awards.find((a) => a.awardType === "realist")).toBeUndefined();
   });
 });

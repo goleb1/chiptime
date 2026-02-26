@@ -89,6 +89,20 @@ export const AWARD_DEFINITIONS: AwardDefinition[] = [
     description:
       "Correctly flagged a runner for DNF using a DNF Call.",
   },
+  {
+    type: "optimist",
+    icon: "🚀",
+    label: "The Optimist",
+    description:
+      "Consistently predicted faster finish times than reality. Always believed in the runner.",
+  },
+  {
+    type: "realist",
+    icon: "🐢",
+    label: "The Realist",
+    description:
+      "Consistently predicted slower finish times than reality. Knew the race would be tough.",
+  },
 ];
 
 // ============================================================
@@ -96,6 +110,10 @@ export const AWARD_DEFINITIONS: AwardDefinition[] = [
 // ============================================================
 
 export const LEADERBOARD_POLL_INTERVAL_MS = 30_000;
+
+// Fallback polling interval used alongside Supabase Realtime subscription
+// in case the Realtime connection drops.
+export const LEADERBOARD_REALTIME_FALLBACK_MS = 60_000;
 
 export const ADMIN_POLL_INTERVAL_MS = 5_000;
 

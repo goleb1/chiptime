@@ -80,6 +80,9 @@ Allow multiple people to administer a game. Useful if the person organizing the 
 ### Bulk Runner Import (CSV)
 Upload a CSV of runners (name, distance) for larger games. Useful if expanding beyond small club events.
 
+### Cropping in photo add
+Ability to crop and see circular overlay preview when uploading an athlete image.
+
 ### Result Entry from Mobile
 Optimized admin interface for entering results on a phone at the finish line. Quick-entry mode: tap runner name, enter time, save, next.
 

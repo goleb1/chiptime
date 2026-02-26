@@ -1,4 +1,4 @@
-import type { Award, AwardType, Guesser, Prediction } from "./types";
+import type { Award, AwardType, Guesser, Prediction, Runner } from "./types";
 
 interface ScoredPrediction {
   guesserId: string;
@@ -49,7 +49,8 @@ function makeAward(
 export function computeAwards(
   predictions: Prediction[],
   guessers: Guesser[],
-  gameId: string
+  gameId: string,
+  runners: Runner[] = []
 ): Award[] {
   const awards: Award[] = [];
 
@@ -163,6 +164,86 @@ export function computeAwards(
         guesser ? `${guesser.name} correctly called a DNF` : null
       )
     );
+  }
+
+  // --- Optimist & Realist: over/under prediction direction ---
+
+  // Build map of runnerId → actualTimeSeconds for finished runners only
+  const runnerActualMap = new Map<string, number>();
+  for (const r of runners) {
+    if (r.status === "finished" && r.actualTimeSeconds !== null) {
+      runnerActualMap.set(r.id, r.actualTimeSeconds);
+    }
+  }
+
+  const MIN_QUALIFIED = 2;
+
+  type BiasStats = {
+    under: number;
+    over: number;
+    total: number;
+    underDelta: number;
+    overDelta: number;
+  };
+  const guesserBias = new Map<string, BiasStats>();
+
+  for (const pred of predictions) {
+    if (pred.errorPercentage === null) continue; // skip DNF/DNS predictions
+    const actual = runnerActualMap.get(pred.runnerId);
+    if (actual === undefined) continue; // runner not finished or not in our map
+
+    if (!guesserBias.has(pred.guesserId)) {
+      guesserBias.set(pred.guesserId, { under: 0, over: 0, total: 0, underDelta: 0, overDelta: 0 });
+    }
+    const b = guesserBias.get(pred.guesserId)!;
+    const delta = pred.predictedTimeSeconds - actual;
+    b.total++;
+    if (delta < 0) {
+      // Predicted a faster time than actual → Optimist tendency
+      b.under++;
+      b.underDelta += Math.abs(delta);
+    } else if (delta > 0) {
+      // Predicted a slower time than actual → Realist tendency
+      b.over++;
+      b.overDelta += delta;
+    }
+    // delta === 0 (exact match): neutral — counted in total but neither bucket
+  }
+
+  const eligible = [...guesserBias.entries()].filter(([, b]) => b.total >= MIN_QUALIFIED);
+
+  if (eligible.length > 0) {
+    // Optimist: guesser who most consistently predicted faster (majority must be under-predictions)
+    // Tiebreak: largest aggregate underDelta (most aggressively optimistic in total seconds)
+    const optimistPool = eligible
+      .filter(([, b]) => b.under > b.over)
+      .sort(([, a], [, b]) => {
+        const rDiff = b.under / b.total - a.under / a.total;
+        return rDiff !== 0 ? rDiff : b.underDelta - a.underDelta;
+      });
+
+    if (optimistPool.length > 0) {
+      const [guesserId, b] = optimistPool[0];
+      awards.push(
+        makeAward(gameId, guesserId, "optimist", `Predicted faster ${b.under}/${b.total} times`)
+      );
+    }
+
+    // Realist: guesser who most consistently predicted slower (majority must be over-predictions)
+    // Tiebreak: largest aggregate overDelta
+    const realistPool = eligible
+      .filter(([, b]) => b.over > b.under)
+      .sort(([, a], [, b]) => {
+        const rDiff = b.over / b.total - a.over / a.total;
+        return rDiff !== 0 ? rDiff : b.overDelta - a.overDelta;
+      });
+
+    if (realistPool.length > 0) {
+      const [guesserId, b] = realistPool[0];
+      awards.push(
+        makeAward(gameId, guesserId, "realist", `Predicted slower ${b.over}/${b.total} times`)
+      );
+    }
   }
 
   return awards;

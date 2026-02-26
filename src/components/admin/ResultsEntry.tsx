@@ -85,17 +85,17 @@ function RunnerResultRow({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-md border border-black/10 px-4 py-3 bg-white/40">
-      <span className="font-medium text-black min-w-[120px]">
+    <div className="flex flex-col gap-3 rounded-md border border-black/10 px-4 py-3 bg-white/40 sm:flex-row sm:flex-wrap sm:items-center">
+      <span className="font-medium text-black">
         {runner.name}
       </span>
 
-      <StatusBadge status={runner.status} />
+      <span className="hidden sm:inline-flex"><StatusBadge status={runner.status} /></span>
 
       <select
         value={status}
         onChange={(e) => setStatus(e.target.value as RunnerStatus)}
-        className="rounded-md border border-black/30 px-2 py-1 text-sm bg-white/60 text-black"
+        className="w-full sm:w-auto rounded-md border border-black/30 px-2 py-2 sm:py-1 text-sm bg-white/60 text-black"
       >
         <option value="registered">Registered</option>
         <option value="finished">Finished</option>
@@ -109,11 +109,11 @@ function RunnerResultRow({
           value={timeStr}
           onChange={(e) => setTimeStr(e.target.value)}
           placeholder="H:MM:SS"
-          className="w-28 rounded-md border border-black/30 px-2 py-1 text-sm bg-white/60 text-black"
+          className="w-full sm:w-28 rounded-md border border-black/30 px-2 py-2 sm:py-1 text-sm bg-white/60 text-black"
         />
       )}
 
-      <Button onClick={handleSave} loading={loading} variant="primary">
+      <Button onClick={handleSave} loading={loading} variant="primary" className="w-full sm:w-auto">
         Save
       </Button>
 
