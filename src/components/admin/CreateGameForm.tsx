@@ -31,7 +31,7 @@ export default function CreateGameForm({ adminSecret }: { adminSecret: string })
 
   return (
     <form action={action} className="space-y-6 max-w-lg">
-      <Input id="name" name="name" label="Game Name" placeholder="e.g. Boston Marathon 2025" required />
+      <Input id="name" name="name" label="Race Name" placeholder="e.g. Boston Marathon 2025" required />
 
       <Input
         id="raceStartTime"
@@ -68,7 +68,7 @@ export default function CreateGameForm({ adminSecret }: { adminSecret: string })
       )}
 
       <Button type="submit" loading={pending}>
-        Create Game
+        Create Race
       </Button>
     </form>
   );

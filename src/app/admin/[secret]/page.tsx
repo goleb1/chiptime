@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase";
 import { mapGameRow } from "@/lib/db-utils";
 import StatusBadge from "@/components/ui/StatusBadge";
 import GameVisibilityToggle from "@/components/admin/GameVisibilityToggle";
+import DeleteGameButton from "@/components/admin/DeleteGameButton";
 import type { Game } from "@/lib/types";
 
 export default async function AdminDashboard({
@@ -32,16 +33,16 @@ export default async function AdminDashboard({
           href={`/admin/${secret}/create`}
           className="inline-flex items-center rounded-md bg-track-red px-4 py-2 text-sm font-medium text-white hover:bg-[#5a1a1c] transition-colors"
         >
-          Create Game
+          Create Race
         </Link>
       </div>
 
       <section>
         <h2 className="text-lg font-semibold font-serif text-black mb-3">
-          Active Games
+          Active Races
         </h2>
         {active.length === 0 ? (
-          <p className="text-sm text-black/50">No active games.</p>
+          <p className="text-sm text-black/50">No active races.</p>
         ) : (
           <div className="space-y-3">
             {active.map((game) => (
@@ -54,7 +55,7 @@ export default async function AdminDashboard({
       {past.length > 0 && (
         <section>
           <h2 className="text-lg font-semibold font-serif text-black mb-3">
-            Past Games
+            Past Races
           </h2>
           <div className="space-y-3">
             {past.map((game) => (
@@ -85,8 +86,9 @@ function GameCard({ game, secret }: { game: Game; secret: string }) {
         </div>
         <StatusBadge status={game.status} />
       </Link>
-      <div className="flex items-center border-l border-black/10 px-3">
+      <div className="flex items-center gap-1 border-l border-black/10 px-3">
         <GameVisibilityToggle gameId={game.id} showOnHomepage={game.showOnHomepage} />
+        <DeleteGameButton gameId={game.id} gameName={game.name} />
       </div>
     </div>
   );

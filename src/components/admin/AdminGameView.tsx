@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import type { Game, Runner } from "@/lib/types";
 import { ADMIN_POLL_INTERVAL_MS } from "@/lib/constants";
 import GameStatusBar from "./GameStatusBar";
@@ -64,9 +65,17 @@ export default function AdminGameView({
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold font-serif text-black">
-          {game.name}
-        </h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-2xl font-bold font-serif text-black">
+            {game.name}
+          </h1>
+          <Link
+            href={`/admin/${secret}/game/${game.slug}/edit`}
+            className="shrink-0 rounded-md border border-black/20 px-3 py-1.5 text-sm font-medium text-black/60 hover:border-black/40 hover:text-black transition-colors"
+          >
+            Edit Settings
+          </Link>
+        </div>
         <p className="text-sm text-black/50 mt-1">
           {game.raceDate} &middot; {game.distances.join(", ")}
         </p>
@@ -113,7 +122,7 @@ export default function AdminGameView({
       {game.status === "finalized" && (
         <section>
           <p className="text-green-700 font-medium">
-            This game has been finalized. Scores and awards have been computed.
+            This race has been finalized. Scores and awards have been computed.
           </p>
         </section>
       )}

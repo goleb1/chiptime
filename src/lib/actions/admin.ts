@@ -70,6 +70,84 @@ export async function createGame(formData: FormData): Promise<ActionResult<Game>
 }
 
 // ============================================================
+// deleteGame
+// ============================================================
+
+export async function deleteGame(gameId: string): Promise<ActionResult> {
+  const db = createAdminClient();
+
+  // Get guesser IDs for this game (needed to cascade predictions)
+  const { data: guessers } = await db
+    .from("guessers")
+    .select("id")
+    .eq("game_id", gameId);
+
+  const guesserIds = (guessers || []).map((g: { id: string }) => g.id);
+
+  // Delete in cascade order to respect FK constraints
+  await db.from("awards").delete().eq("game_id", gameId);
+
+  if (guesserIds.length > 0) {
+    await db.from("predictions").delete().in("guesser_id", guesserIds);
+  }
+
+  await db.from("guessers").delete().eq("game_id", gameId);
+  await db.from("runners").delete().eq("game_id", gameId);
+
+  const { error } = await db.from("games").delete().eq("id", gameId);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  const adminSecret = process.env.ADMIN_SECRET;
+  revalidatePath(`/admin/${adminSecret}`);
+  revalidatePath("/");
+
+  return { success: true, data: undefined };
+}
+
+// ============================================================
+// updateGame
+// ============================================================
+
+export async function updateGame(formData: FormData): Promise<ActionResult<Game>> {
+  const gameId = formData.get("gameId") as string;
+  const name = formData.get("name") as string;
+  const raceStartTime = formData.get("raceStartTime") as string;
+  const raceWebsiteUrl = (formData.get("raceWebsiteUrl") as string) || null;
+  const distancesRaw = formData.getAll("distances") as string[];
+
+  if (!gameId || !name || !raceStartTime || distancesRaw.length === 0) {
+    return { success: false, error: "All fields are required, including at least one distance." };
+  }
+
+  const db = createAdminClient();
+
+  const { data, error } = await db
+    .from("games")
+    .update({
+      name,
+      race_date: raceStartTime.split("T")[0],
+      race_start_time: raceStartTime,
+      prediction_deadline: raceStartTime,
+      race_website_url: raceWebsiteUrl,
+      distances: distancesRaw,
+    })
+    .eq("id", gameId)
+    .select()
+    .single();
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidateGamePages(gameId);
+
+  return { success: true, data: mapGameRow(data) };
+}
+
+// ============================================================
 // toggleGameVisibility
 // ============================================================
 
