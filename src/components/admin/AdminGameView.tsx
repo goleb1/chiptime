@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import type { Game, Runner } from "@/lib/types";
 import { ADMIN_POLL_INTERVAL_MS } from "@/lib/constants";
+import { formatRaceDate, formatRaceTime } from "@/lib/utils";
 import GameStatusBar from "./GameStatusBar";
 import GameVisibilityToggle from "./GameVisibilityToggle";
 import RunnerForm from "./RunnerForm";
@@ -77,7 +78,12 @@ export default function AdminGameView({
           </Link>
         </div>
         <p className="text-sm text-black/50 mt-1">
-          {game.raceDate} &middot; {game.distances.join(", ")}
+          {formatRaceDate(game.raceDate)}
+          {" · "}
+          {formatRaceTime(game.raceStartTime)}
+          {game.location && ` · ${game.location}`}
+          {" · "}
+          {game.distances.join(", ")}
         </p>
         <div className="flex flex-wrap items-center gap-3 mt-1">
           <p className="text-sm text-black/40">
