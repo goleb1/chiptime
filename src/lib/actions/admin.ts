@@ -472,9 +472,26 @@ export async function finalizeGame(gameId: string): Promise<ActionResult> {
   const mappedGuessers = (guessersRaw || []).map(mapGuesserRow);
   const mappedPredictions = (predictionsRaw || []).map(mapPredictionRow);
 
+  // Compute fresh prediction scores from runner results — don't rely on
+  // DB-stored errorPercentage which may be stale if enterResult() was skipped.
+  const runnerMap = new Map(mappedRunners.map((r) => [r.id, r]));
+  const freshPredictions = mappedPredictions.map((pred) => {
+    const runner = runnerMap.get(pred.runnerId);
+    if (!runner) return pred;
+    if (runner.status === "dnf" || runner.status === "dns") {
+      const ps = scoreDnf(pred.dnfBadge);
+      return { ...pred, score: ps.score, errorPercentage: ps.errorPercentage, tierLabel: ps.tierLabel };
+    }
+    if (runner.status === "finished" && runner.actualTimeSeconds !== null) {
+      const ps = scorePrediction(pred.predictedTimeSeconds, runner.actualTimeSeconds);
+      return { ...pred, score: ps.score, errorPercentage: ps.errorPercentage, tierLabel: ps.tierLabel };
+    }
+    return pred;
+  });
+
   // Score each guesser
   const guesserScores = mappedGuessers.map((guesser) => {
-    const guesserPreds = mappedPredictions.filter(
+    const guesserPreds = freshPredictions.filter(
       (p) => p.guesserId === guesser.id
     );
     return scoreGuesser(guesserPreds, mappedRunners);
@@ -500,19 +517,23 @@ export async function finalizeGame(gameId: string): Promise<ActionResult> {
       .eq("id", gs.guesserId);
   }
 
-  // Compute and insert awards
-  const awards = computeAwards(mappedPredictions, mappedGuessers, gameId, mappedRunners);
-  if (awards.length > 0) {
-    // Delete existing awards for this game first
-    await db.from("awards").delete().eq("game_id", gameId);
+  // Build ranked guessers array for computeAwards (with freshly computed scores)
+  const rankedGuessers = guesserScores.map((gs, i) => {
+    const guesser = mappedGuessers.find((g) => g.id === gs.guesserId)!;
+    return { ...guesser, totalScore: gs.totalScore, rank: i + 1 };
+  });
 
+  // Compute and insert awards using fresh scores and ranked guessers
+  const awards = computeAwards(freshPredictions, rankedGuessers, gameId, mappedRunners);
+  // Always delete existing awards and re-insert (even if empty, to clear stale data)
+  await db.from("awards").delete().eq("game_id", gameId);
+  if (awards.length > 0) {
     const awardRows = awards.map((a) => ({
       game_id: a.gameId,
       guesser_id: a.guesserId,
       award_type: a.awardType,
       detail: a.detail,
     }));
-
     await db.from("awards").insert(awardRows);
   }
 
