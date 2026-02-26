@@ -89,6 +89,13 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
   const isFinalized = data.status === "finalized";
   const isLive = data.status === "results_entering" || data.status === "predictions_locked";
 
+  function rankDisplay(rank: number | null): string {
+    if (rank === 1) return "🥇";
+    if (rank === 2) return "🥈";
+    if (rank === 3) return "🥉";
+    return rank?.toString() ?? "—";
+  }
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
@@ -136,8 +143,8 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                   onClick={() => toggleExpanded(guesser.id)}
                   className="w-full grid grid-cols-[2rem_1fr_auto_3.5rem_2rem] gap-2 px-4 py-3 text-left hover:bg-black/5 transition-colors"
                 >
-                  <span className="text-sm font-medium text-black/40">
-                    {guesser.rank ?? "—"}
+                  <span className={`font-medium leading-none ${guesser.rank != null && guesser.rank <= 3 ? "text-base" : "text-sm text-black/40"}`}>
+                    {rankDisplay(guesser.rank)}
                   </span>
                   <span className="text-sm font-medium text-black truncate min-w-0">
                     {guesser.name}
