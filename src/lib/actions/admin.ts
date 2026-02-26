@@ -33,12 +33,11 @@ const VALID_TRANSITIONS: Record<GameStatus, GameStatus[]> = {
 
 export async function createGame(formData: FormData): Promise<ActionResult<Game>> {
   const name = formData.get("name") as string;
-  const raceDate = formData.get("raceDate") as string;
   const raceStartTime = formData.get("raceStartTime") as string;
   const predictionDeadline = formData.get("predictionDeadline") as string;
   const distancesRaw = formData.getAll("distances") as string[];
 
-  if (!name || !raceDate || !raceStartTime || !predictionDeadline || distancesRaw.length === 0) {
+  if (!name || !raceStartTime || !predictionDeadline || distancesRaw.length === 0) {
     return { success: false, error: "All fields are required, including at least one distance." };
   }
 
@@ -50,7 +49,7 @@ export async function createGame(formData: FormData): Promise<ActionResult<Game>
     .insert({
       slug,
       name,
-      race_date: raceDate,
+      race_date: raceStartTime.split("T")[0],
       race_start_time: raceStartTime,
       prediction_deadline: predictionDeadline,
       distances: distancesRaw,

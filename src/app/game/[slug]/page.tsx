@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase";
 import {
@@ -72,8 +73,13 @@ export default async function GamePage({
 
   if (game.status === "setup") {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-black/50">Predictions aren&apos;t open yet. Check back soon!</p>
+      <div className="min-h-screen px-4 py-8">
+        <div className="w-full max-w-2xl mx-auto space-y-6">
+          <Link href="/" className="text-sm text-track-red hover:underline">
+            ← Chiptime
+          </Link>
+          <p className="text-black/50">Predictions aren&apos;t open yet. Check back soon!</p>
+        </div>
       </div>
     );
   }
@@ -88,7 +94,12 @@ export default async function GamePage({
     const runners = (runnerRows || []).map(mapRunnerRow);
 
     return (
-      <div className="min-h-screen px-4">
+      <div className="min-h-screen px-4 pt-8">
+        <div className="w-full max-w-2xl mx-auto mb-4">
+          <Link href="/" className="text-sm text-track-red hover:underline">
+            ← Chiptime
+          </Link>
+        </div>
         <PredictionForm game={game} runners={runners} />
       </div>
     );
@@ -100,6 +111,9 @@ export default async function GamePage({
   return (
     <div className="min-h-screen px-4 py-8">
       <div className="w-full max-w-2xl mx-auto space-y-6">
+        <Link href="/" className="text-sm text-track-red hover:underline">
+          ← Chiptime
+        </Link>
         <div className="space-y-2">
           <h1 className="text-2xl font-bold font-serif text-black">
             {game.name}

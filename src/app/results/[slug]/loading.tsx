@@ -3,7 +3,7 @@ export default function Loading() {
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <svg
-          className="h-8 w-8 animate-spin text-indigo-600"
+          className="h-8 w-8 animate-spin text-track-red"
           viewBox="0 0 24 24"
           fill="none"
         >
@@ -21,7 +21,7 @@ export default function Loading() {
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
           />
         </svg>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Loading results...</p>
+        <p className="text-sm text-black/50">Loading results...</p>
       </div>
     </div>
   );

@@ -33,8 +33,6 @@ export default function CreateGameForm({ adminSecret }: { adminSecret: string })
     <form action={action} className="space-y-6 max-w-lg">
       <Input id="name" name="name" label="Game Name" placeholder="e.g. Boston Marathon 2025" required />
 
-      <Input id="raceDate" name="raceDate" label="Race Date" type="date" required />
-
       <Input
         id="raceStartTime"
         name="raceStartTime"

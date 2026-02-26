@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase";
 import {
@@ -75,6 +76,10 @@ export default async function ResultsPage({
   return (
     <div className="min-h-screen px-4 py-8">
       <div className="w-full max-w-2xl mx-auto space-y-6">
+        <Link href="/" className="text-sm text-track-red hover:underline">
+          ← Chiptime
+        </Link>
+
         {/* Game header */}
         <div className="space-y-2">
           <h1 className="text-2xl font-bold font-serif text-black">
