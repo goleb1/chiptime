@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState, useEffect, useRef } from "react";
+import { useState, useActionState, useEffect, useRef, useTransition } from "react";
 import { createAthlete, updateAthlete } from "@/lib/actions/admin";
 import type { ActionResult } from "@/lib/db-utils";
 import type { Athlete } from "@/lib/types";
@@ -71,6 +71,11 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
   const [photoPreview, setPhotoPreview] = useState<string | null>(athlete?.photoUrl ?? null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Separate upload state so we can show specific upload errors and a
+  // loading indicator while the photo is being sent to the API route.
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploading, startUpload] = useTransition();
+
   const [state, action, pending] = useActionState(
     isEdit ? updateAthleteAction : createAthleteAction,
     null
@@ -123,7 +128,43 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
     <form
       action={(fd) => {
         fd.set("prs", buildPrsJson());
-        action(fd);
+        setUploadError(null);
+
+        const photoFile = fd.get("photo") as File | null;
+
+        if (photoFile && photoFile.size > 0) {
+          // Upload the photo via the API route (no body-size limit) and
+          // replace the File in FormData with just the returned URL string.
+          startUpload(async () => {
+            const uploadFd = new FormData();
+            uploadFd.append("photo", photoFile);
+
+            let photoUrl: string;
+            try {
+              const res = await fetch("/api/admin/upload-photo", {
+                method: "POST",
+                body: uploadFd,
+              });
+              const json = await res.json();
+              if (!res.ok) {
+                setUploadError(json.error ?? "Photo upload failed.");
+                return;
+              }
+              photoUrl = json.url;
+            } catch {
+              setUploadError("Photo upload failed. Check your connection and try again.");
+              return;
+            }
+
+            // Replace the binary file with a plain URL string so the
+            // server action body stays tiny.
+            fd.delete("photo");
+            fd.set("photoUrl", photoUrl);
+            action(fd);
+          });
+        } else {
+          action(fd);
+        }
       }}
       className="space-y-6"
     >
@@ -246,12 +287,15 @@ export default function AthleteForm({ athlete, onDone, onCancel }: AthleteFormPr
         )}
       </div>
 
+      {uploadError && (
+        <p className="text-sm text-red-600">{uploadError}</p>
+      )}
       {state && !state.success && (
         <p className="text-sm text-red-600">{state.error}</p>
       )}
 
       <div className="flex items-center gap-3">
-        <Button type="submit" loading={pending}>
+        <Button type="submit" loading={isUploading || pending}>
           {isEdit ? "Save Changes" : "Add Athlete"}
         </Button>
         {onCancel && (

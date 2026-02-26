@@ -504,19 +504,23 @@ export async function createAthlete(formData: FormData): Promise<ActionResult<At
 
   const db = createAdminClient();
 
-  // Handle photo upload if provided
+  // Photo: prefer a pre-uploaded URL (sent by the client after uploading via
+  // /api/admin/upload-photo), fall back to a raw file for small images.
   let photoUrl: string | null = null;
+  const photoUrlField = formData.get("photoUrl") as string | null;
   const photoFile = formData.get("photo") as File | null;
-  if (photoFile && photoFile.size > 0) {
+
+  if (photoUrlField) {
+    photoUrl = photoUrlField;
+  } else if (photoFile && photoFile.size > 0) {
     const bucketErr = await ensurePhotoBucket(db);
     if (bucketErr) {
       return { success: false, error: `Storage setup failed: ${bucketErr}` };
     }
-
     const ext = photoFile.name.split(".").pop() ?? "jpg";
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const bytes = await photoFile.arrayBuffer();
-    const mimeType = photoFile.type || "image/jpeg"; // some browsers omit MIME type
+    const mimeType = photoFile.type || "image/jpeg";
     const { error: uploadError } = await db.storage
       .from("athlete-photos")
       .upload(path, bytes, { contentType: mimeType, upsert: false });
@@ -564,19 +568,23 @@ export async function updateAthlete(formData: FormData): Promise<ActionResult<At
 
   const db = createAdminClient();
 
-  // Handle photo upload if provided
-  let photoUrl: string | undefined; // undefined = don't change
+  // Photo: prefer a pre-uploaded URL (sent by the client after uploading via
+  // /api/admin/upload-photo), fall back to a raw file for small images.
+  let photoUrl: string | undefined; // undefined = don't change existing photo
+  const photoUrlField = formData.get("photoUrl") as string | null;
   const photoFile = formData.get("photo") as File | null;
-  if (photoFile && photoFile.size > 0) {
+
+  if (photoUrlField) {
+    photoUrl = photoUrlField;
+  } else if (photoFile && photoFile.size > 0) {
     const bucketErr = await ensurePhotoBucket(db);
     if (bucketErr) {
       return { success: false, error: `Storage setup failed: ${bucketErr}` };
     }
-
     const ext = photoFile.name.split(".").pop() ?? "jpg";
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const bytes = await photoFile.arrayBuffer();
-    const mimeType = photoFile.type || "image/jpeg"; // some browsers omit MIME type
+    const mimeType = photoFile.type || "image/jpeg";
     const { error: uploadError } = await db.storage
       .from("athlete-photos")
       .upload(path, bytes, { contentType: mimeType, upsert: false });
