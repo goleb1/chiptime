@@ -158,7 +158,16 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
                 {/* Expanded detail */}
                 {isExpanded && (
                   <div className="px-4 pb-3 bg-black/5">
-                    <div className="space-y-1">
+                    {/* Column headers — desktop only */}
+                    <div className="hidden sm:grid sm:grid-cols-[1fr_5rem_5rem_4rem_3.5rem] sm:gap-2 text-[10px] uppercase tracking-wider pb-1.5 mb-0.5 border-b border-black/10">
+                      <span className="text-black/30">Runner</span>
+                      <span className="text-right text-[#b07828]">Guess</span>
+                      <span className="text-right text-[#22a85a]">Result</span>
+                      <span className="text-right text-black/30">Error</span>
+                      <span className="text-right text-black/30">Pts</span>
+                    </div>
+
+                    <div className="space-y-1 mt-1">
                       {sortedRunners.map((runner) => {
                         const pred = predictions.find(
                           (p) => p.runnerId === runner.id
@@ -192,18 +201,19 @@ export default function Leaderboard({ slug, initialData }: LeaderboardProps) {
 
                             {/* Predicted time */}
                             <span className="sm:text-right">
-                              <span className="text-black/40 sm:hidden text-[10px]">Pred: </span>
-                              <DigitalTime seconds={pred.predictedTimeSeconds} />
+                              <span className="text-[10px] text-[#b07828] sm:hidden">Guess </span>
+                              <DigitalTime seconds={pred.predictedTimeSeconds} variant="predicted" />
                             </span>
 
                             {/* Actual time */}
                             <span className="text-right sm:text-right">
+                              <span className="text-[10px] text-[#22a85a] sm:hidden">Result </span>
                               {!hasResult ? (
-                                <DigitalTime seconds={null} />
+                                <DigitalTime seconds={null} variant="actual" />
                               ) : isDnf ? (
                                 <span className="text-track-red font-medium">DNF</span>
                               ) : (
-                                <DigitalTime seconds={runner.actualTimeSeconds!} />
+                                <DigitalTime seconds={runner.actualTimeSeconds!} variant="actual" />
                               )}
                             </span>
 

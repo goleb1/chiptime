@@ -42,15 +42,26 @@ a {
   display: inline-flex;
   align-items: center;
   font-family: var(--font-digital, "Courier New", monospace);
-  background-color: #111;
-  color: #c44444;
-  border-radius: 4px;
-  padding: 2px 8px;
-  letter-spacing: 0.08em;
-  font-size: 0.9em;
+  background-color: #141414;
+  color: #e8a838;             /* warm amber — predicted/guess */
+  border-radius: 5px;
+  padding: 3px 10px;
+  letter-spacing: 0.06em;
+  font-size: 0.8125rem;       /* 13px — fixed for consistent sizing */
   font-variant-numeric: tabular-nums;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* Awaiting value (--:--:--) */
 .digital-time.awaiting {
-  color: #553333;
+  color: #5a3e10;
+}
+
+/* Official result time — green like a finish-line clock */
+.digital-time.actual {
+  color: #4ade80;
+}
+
+.digital-time.actual.awaiting {
+  color: #0d3a1a;
 }
