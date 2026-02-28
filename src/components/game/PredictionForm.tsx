@@ -35,6 +35,38 @@ function fieldsToSeconds(f: TimeFields): number {
   return f.hours * 3600 + f.minutes * 60 + f.seconds;
 }
 
+const DISTANCE_KM: Record<string, number> = {
+  "100m":          0.1,
+  "200m":          0.2,
+  "400m":          0.4,
+  "800m":          0.8,
+  "1 Mile":        1.60934,
+  "2 Mile":        3.21869,
+  "5K":            5,
+  "5 Mile":        8.04672,
+  "10K":           10,
+  "10 Mile":       16.0934,
+  "Half Marathon": 21.0975,
+  "15 Mile":       24.1402,
+  "20 Mile":       32.1869,
+  "Full Marathon": 42.195,
+  "50K":           50,
+  "50 Mile":       80.4672,
+  "100K":          100,
+  "100 Mile":      160.934,
+};
+
+function computePace(totalSeconds: number, distanceName: string, unit: "mi" | "km"): string | null {
+  const km = DISTANCE_KM[distanceName];
+  if (!km || totalSeconds <= 0) return null;
+  const dist = unit === "mi" ? km / 1.60934 : km;
+  const secsPerUnit = totalSeconds / dist;
+  const m = Math.floor(secsPerUnit / 60);
+  const s = Math.round(secsPerUnit % 60);
+  if (s === 60) return `${m + 1}:00`;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
 function formatRaceCountdown(ms: number): string {
   if (!isFinite(ms) || ms <= 0) return "Race day!";
   const s = Math.floor(ms / 1000);
@@ -66,6 +98,7 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [paceUnit, setPaceUnit] = useState<"mi" | "km">("mi");
 
   // Decorative countdown to race start — no effect on submission ability
   const [raceCountdown, setRaceCountdown] = useState<number>(() =>
@@ -290,6 +323,11 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
                       );
                     })()}
                   </div>
+
+                  {/* Distance badge — top right of card */}
+                  <span className="shrink-0 text-[11px] font-medium text-black/40 bg-black/6 rounded px-1.5 py-0.5 leading-none mt-0.5">
+                    {runner.distance}
+                  </span>
                 </div>
 
                 {/* Time picker — full width */}
@@ -306,26 +344,40 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
                   }}
                 />
 
-                {/* DNF pill toggle */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!dnfBadges[runner.id] && dnfCount >= MAX_DNF_BADGES_PER_GUESSER) return;
-                    setDnfBadges((prev) => ({
-                      ...prev,
-                      [runner.id]: !prev[runner.id],
-                    }));
-                  }}
-                  disabled={!dnfBadges[runner.id] && dnfCount >= MAX_DNF_BADGES_PER_GUESSER}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-                    dnfBadges[runner.id]
-                      ? "bg-track-red text-white border-track-red"
-                      : "bg-transparent text-black/50 border-black/25 hover:border-black/50"
-                  }`}
-                >
-                  <span aria-hidden="true">{dnfBadges[runner.id] ? "✕" : "⚑"}</span>
-                  <span>DNF Call</span>
-                </button>
+                {/* Bottom row: DNF toggle (left) + pace display (right) */}
+                <div className="flex items-center justify-between">
+                  {/* DNF pill toggle */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!dnfBadges[runner.id] && dnfCount >= MAX_DNF_BADGES_PER_GUESSER) return;
+                      setDnfBadges((prev) => ({
+                        ...prev,
+                        [runner.id]: !prev[runner.id],
+                      }));
+                    }}
+                    disabled={!dnfBadges[runner.id] && dnfCount >= MAX_DNF_BADGES_PER_GUESSER}
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                      dnfBadges[runner.id]
+                        ? "bg-track-red text-white border-track-red"
+                        : "bg-transparent text-black/50 border-black/25 hover:border-black/50"
+                    }`}
+                  >
+                    <span aria-hidden="true">{dnfBadges[runner.id] ? "✕" : "⚑"}</span>
+                    <span>DNF Call</span>
+                  </button>
+
+                  {/* Pace display — tap to toggle mi/km */}
+                  <button
+                    type="button"
+                    onClick={() => setPaceUnit((u) => (u === "mi" ? "km" : "mi"))}
+                    title="Tap to switch between min/mi and min/km"
+                    className="inline-flex items-center gap-1 rounded-full border border-black/15 px-3 py-1.5 text-xs font-mono text-black/50 hover:border-black/30 hover:text-black/70 transition-colors"
+                  >
+                    <span>{computePace(fieldsToSeconds(times[runner.id]), runner.distance, paceUnit) ?? "—"}</span>
+                    <span className="text-black/35">/{paceUnit}</span>
+                  </button>
+                </div>
               </div>
             ))}
           </section>
