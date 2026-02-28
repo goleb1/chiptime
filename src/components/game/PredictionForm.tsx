@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -35,6 +35,16 @@ function fieldsToSeconds(f: TimeFields): number {
   return f.hours * 3600 + f.minutes * 60 + f.seconds;
 }
 
+function formatRaceCountdown(ms: number): string {
+  if (!isFinite(ms) || ms <= 0) return "Race day!";
+  const s = Math.floor(ms / 1000);
+  const d = Math.floor(s / 86400);
+  const h = Math.floor((s % 86400) / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
 
 export default function PredictionForm({ game, runners }: PredictionFormProps) {
   const router = useRouter();
@@ -56,6 +66,21 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+
+  // Decorative countdown to race start — no effect on submission ability
+  const [raceCountdown, setRaceCountdown] = useState<number>(() =>
+    game.raceStartTime
+      ? new Date(game.raceStartTime).getTime() - Date.now()
+      : Infinity
+  );
+
+  useEffect(() => {
+    if (!game.raceStartTime) return;
+    const interval = setInterval(() => {
+      setRaceCountdown(new Date(game.raceStartTime).getTime() - Date.now());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [game.raceStartTime]);
 
   const dnfCount = useMemo(
     () => Object.values(dnfBadges).filter(Boolean).length,
@@ -116,6 +141,11 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
         <Image src="/chiptime.svg" alt="" width={24} height={28} className="h-7 w-auto" />
         <span className="font-serif italic text-cream font-bold text-lg leading-none">Chiptime</span>
       </Link>
+      {game.raceStartTime && (
+        <span className="font-mono text-white/80 text-xs">
+          {formatRaceCountdown(raceCountdown)}
+        </span>
+      )}
     </header>
   );
 
