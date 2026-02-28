@@ -99,6 +99,7 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [paceUnit, setPaceUnit] = useState<"mi" | "km">("mi");
+  const [showReview, setShowReview] = useState(false);
 
   // Decorative countdown to race start — no effect on submission ability
   const [raceCountdown, setRaceCountdown] = useState<number>(() =>
@@ -181,6 +182,132 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
       )}
     </header>
   );
+
+  if (showReview) {
+    return (
+      <div className="min-h-screen bg-cream pb-24">
+        {stickyHeader}
+
+        <div className="pt-11">
+          <div className="max-w-lg mx-auto">
+
+            {/* Review header */}
+            <div className="px-4 py-3 border-b border-black/10">
+              <h2 className="font-serif font-bold text-xl text-black">Review Your Picks</h2>
+              <p className="text-sm text-black/50 mt-0.5">
+                Submitting as <span className="font-medium text-black/70">{guesserName.trim()}</span>
+              </p>
+            </div>
+
+            {/* Error banner */}
+            {error && (
+              <div className="mx-4 mt-3 rounded-md border border-red-200 bg-red-50 p-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
+            {/* Per-distance runner summaries */}
+            {groupedRunners.map((group) => (
+              <section key={group.distance}>
+                <div className="px-4 py-2 bg-black/5 border-b border-black/10">
+                  <span className="text-xs font-semibold text-black/50 uppercase tracking-wider">
+                    {group.distance}
+                  </span>
+                </div>
+
+                {group.runners.map((runner) => {
+                  const totalSecs = fieldsToSeconds(times[runner.id]);
+                  const isDnf = dnfBadges[runner.id];
+                  return (
+                    <div
+                      key={runner.id}
+                      className="px-4 py-3 border-b border-black/10 flex items-center gap-3"
+                    >
+                      {/* Avatar */}
+                      {runner.athlete && (
+                        runner.athlete.photoUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={runner.athlete.photoUrl}
+                            alt={runner.name}
+                            className="h-9 w-9 rounded-full object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="h-9 w-9 rounded-full bg-black/10 flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm font-medium text-black/50">
+                              {runner.name[0]?.toUpperCase()}
+                            </span>
+                          </div>
+                        )
+                      )}
+
+                      {/* Name + details */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-black text-sm leading-tight">{runner.name}</p>
+                        {(runner.athlete?.gender || runner.athlete?.birthYear) && (
+                          <p className="text-xs font-mono text-black/40">
+                            {runner.athlete.birthYear
+                              ? `${new Date().getFullYear() - runner.athlete.birthYear}${runner.athlete.gender ?? ""}`
+                              : runner.athlete.gender}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Predicted time + DNF badge */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {isDnf && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-track-red text-white border border-track-red px-2 py-0.5 text-xs font-medium">
+                            <span aria-hidden="true">✕</span>
+                            <span>DNF</span>
+                          </span>
+                        )}
+                        <span className="font-mono text-sm font-semibold text-black">
+                          {secondsToTimeString(totalSecs)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </section>
+            ))}
+
+            {/* DNF summary */}
+            {dnfCount > 0 && (
+              <p className="px-4 pt-3 pb-6 text-xs text-black/40 leading-relaxed">
+                <span className="font-medium text-black/50">DNF Calls used:</span>{" "}
+                {dnfCount} of {MAX_DNF_BADGES_PER_GUESSER}
+              </p>
+            )}
+            {dnfCount === 0 && <div className="pb-6" />}
+
+          </div>
+        </div>
+
+        {/* ─── Fixed bottom action bar ─── */}
+        <div className="fixed bottom-0 inset-x-0 bg-cream border-t border-black/15 py-3 z-30">
+          <div className="max-w-lg mx-auto px-4 flex gap-3">
+            <button
+              type="button"
+              onClick={() => { setError(null); setShowReview(false); }}
+              className="flex-1 rounded-lg border border-black/25 px-4 py-2.5 text-sm font-medium text-black/70 hover:border-black/50 hover:text-black transition-colors"
+            >
+              Edit Picks
+            </button>
+            <div className="flex-[2]">
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting}
+                loading={submitting}
+                className="w-full"
+              >
+                Submit Picks
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
@@ -397,12 +524,11 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
       <div className="fixed bottom-0 inset-x-0 bg-cream border-t border-black/15 py-3 z-30">
         <div className="max-w-lg mx-auto px-4">
           <Button
-            onClick={handleSubmit}
+            onClick={() => setShowReview(true)}
             disabled={!canSubmit}
-            loading={submitting}
             className="w-full"
           >
-            Submit Predictions
+            Review Picks
           </Button>
         </div>
       </div>
