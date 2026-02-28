@@ -323,6 +323,11 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
                       );
                     })()}
                   </div>
+
+                  {/* Distance badge — top right of card */}
+                  <span className="shrink-0 text-[11px] font-medium text-black/40 bg-black/6 rounded px-1.5 py-0.5 leading-none mt-0.5">
+                    {runner.distance}
+                  </span>
                 </div>
 
                 {/* Time picker — full width */}
