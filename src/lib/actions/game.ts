@@ -39,10 +39,6 @@ export async function submitPredictions(
     return { success: false, error: "Predictions are not currently open for this game." };
   }
 
-  if (new Date() >= new Date(game.prediction_deadline)) {
-    return { success: false, error: "The prediction deadline has passed." };
-  }
-
   // Fetch runners for this game
   const { data: runners } = await db
     .from("runners")
