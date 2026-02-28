@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -35,16 +35,6 @@ function fieldsToSeconds(f: TimeFields): number {
   return f.hours * 3600 + f.minutes * 60 + f.seconds;
 }
 
-function formatCompactCountdown(ms: number): string {
-  if (!isFinite(ms) || ms <= 0) return "Closed";
-  const s = Math.floor(ms / 1000);
-  const d = Math.floor(s / 86400);
-  const h = Math.floor((s % 86400) / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  if (d > 0) return `${d}d ${h}h ${m}m`;
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
 
 export default function PredictionForm({ game, runners }: PredictionFormProps) {
   const router = useRouter();
@@ -66,23 +56,6 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
-
-  // Live countdown derived from predictionDeadline (= raceStartTime)
-  const [remaining, setRemaining] = useState<number>(() =>
-    game.predictionDeadline
-      ? new Date(game.predictionDeadline).getTime() - Date.now()
-      : Infinity
-  );
-
-  useEffect(() => {
-    if (!game.predictionDeadline) return;
-    const interval = setInterval(() => {
-      setRemaining(new Date(game.predictionDeadline).getTime() - Date.now());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [game.predictionDeadline]);
-
-  const deadlinePassed = remaining <= 0;
 
   const dnfCount = useMemo(
     () => Object.values(dnfBadges).filter(Boolean).length,
@@ -109,8 +82,7 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
 
   const canSubmit =
     guesserName.trim().length > 0 &&
-    !submitting &&
-    !deadlinePassed;
+    !submitting;
 
   async function handleSubmit() {
     setError(null);
@@ -144,9 +116,6 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
         <Image src="/chiptime.svg" alt="" width={24} height={28} className="h-7 w-auto" />
         <span className="font-serif italic text-cream font-bold text-lg leading-none">Chiptime</span>
       </Link>
-      <span className="font-mono text-white/80 text-xs">
-        {deadlinePassed ? "Closed" : formatCompactCountdown(remaining)}
-      </span>
     </header>
   );
 
@@ -218,7 +187,6 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
             placeholder="Enter your name"
             value={guesserName}
             onChange={(e) => setGuesserName(e.target.value)}
-            disabled={deadlinePassed}
           />
         </div>
 
@@ -306,24 +274,19 @@ export default function PredictionForm({ game, runners }: PredictionFormProps) {
                       [runner.id]: { ...prev[runner.id], [field]: value },
                     }));
                   }}
-                  disabled={deadlinePassed}
                 />
 
                 {/* DNF pill toggle */}
                 <button
                   type="button"
                   onClick={() => {
-                    if (deadlinePassed) return;
                     if (!dnfBadges[runner.id] && dnfCount >= MAX_DNF_BADGES_PER_GUESSER) return;
                     setDnfBadges((prev) => ({
                       ...prev,
                       [runner.id]: !prev[runner.id],
                     }));
                   }}
-                  disabled={
-                    deadlinePassed ||
-                    (!dnfBadges[runner.id] && dnfCount >= MAX_DNF_BADGES_PER_GUESSER)
-                  }
+                  disabled={!dnfBadges[runner.id] && dnfCount >= MAX_DNF_BADGES_PER_GUESSER}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                     dnfBadges[runner.id]
                       ? "bg-track-red text-white border-track-red"
